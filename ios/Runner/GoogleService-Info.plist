@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>1012244723831-6013kmbaic235gsngu9simou68j5161a.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.1012244723831-6013kmbaic235gsngu9simou68j5161a</string>
+	<key>ANDROID_CLIENT_ID</key>
+	<string>1012244723831-9doungfk2jv7f5ltb0vgegghevh96ge1.apps.googleusercontent.com</string>
+	<key>API_KEY</key>
+	<string>AIzaSyCE3cMY_RuUneHA_HOXDtJ63ja_-SH4AB4</string>
+	<key>GCM_SENDER_ID</key>
+	<string>1012244723831</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.tapontask.app</string>
+	<key>PROJECT_ID</key>
+	<string>tapontask</string>
+	<key>STORAGE_BUCKET</key>
+	<string>tapontask.firebasestorage.app</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:1012244723831:ios:6d6382bf89734348e46e72</string>
+</dict>
+</plist>

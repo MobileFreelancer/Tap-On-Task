@@ -1,0 +1,42 @@
+name: tapontask
+description: "Tap On Task - Connect with trusted taskers for your everyday needs"
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.11.5
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+  provider: ^6.1.2
+  go_router: ^14.8.1
+  dio: ^5.7.0
+  flutter_secure_storage: ^9.2.4
+  flutter_dotenv: ^5.2.1
+  google_fonts: ^6.2.1
+  flutter_svg: ^2.0.17
+  phone_form_field: ^10.0.4
+  firebase_core: ^3.12.1
+  firebase_auth: ^5.5.1
+  cloud_firestore: ^5.6.5
+  image_picker: ^1.1.2
+  intl: ^0.20.2
+  cached_network_image: ^3.4.1
+  shimmer: ^3.0.0
+  google_sign_in: ^6.2.2
+  sign_in_with_apple: ^6.1.4
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - .env
+    - assets/images/
+    - assets/icons/
+    - assets/svgs/

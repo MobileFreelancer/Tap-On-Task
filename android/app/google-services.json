@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "1012244723831",
+    "project_id": "tapontask",
+    "storage_bucket": "tapontask.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1012244723831:android:a34f68f502a08dbfe46e72",
+        "android_client_info": {
+          "package_name": "com.tapontask.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1012244723831-9doungfk2jv7f5ltb0vgegghevh96ge1.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.tapontask.app",
+            "certificate_hash": "84f7a8136646ad6fc916b3b7c207ee9dbe4fcd7b"
+          }
+        },
+        {
+          "client_id": "1012244723831-qha91tqa3v8adhjsl8jbmqe2cc98t0kd.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBKl0zqT3s6gFf02CTph6M-jiiqnCQ5ngk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1012244723831-qha91tqa3v8adhjsl8jbmqe2cc98t0kd.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "1012244723831-6013kmbaic235gsngu9simou68j5161a.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.tapontask.app"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
