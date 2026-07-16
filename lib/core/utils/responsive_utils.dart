@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-/// Responsive scaling utilities based on a 390px design width.
+/// Responsive scaling via flutter_screenutil (design: 390×844).
 class ResponsiveUtils {
   ResponsiveUtils._();
 
-  static const double _designWidth = 390;
-  static const double _designHeight = 844;
+  static const Size designSize = Size(390, 844);
 
   static Size screenSize(BuildContext context) => MediaQuery.sizeOf(context);
 
@@ -13,28 +13,20 @@ class ResponsiveUtils {
 
   static double height(BuildContext context) => screenSize(context).height;
 
-  static double scale(BuildContext context) => width(context) / _designWidth;
+  static double w(BuildContext context, double value) => value.w;
 
-  static double w(BuildContext context, double value) => value * scale(context);
+  static double h(BuildContext context, double value) => value.h;
 
-  static double h(BuildContext context, double value) =>
-      value * (height(context) / _designHeight);
+  static double sp(BuildContext context, double value) => value.sp;
 
-  static double sp(BuildContext context, double value) {
-    final scaleFactor = scale(context).clamp(0.85, 1.15);
-    return value * scaleFactor;
-  }
+  static double radius(BuildContext context, double value) => value.r;
 
-  static double radius(BuildContext context, double value) => w(context, value);
-
-  static EdgeInsets padding(BuildContext context, {
+  static EdgeInsets padding(
+    BuildContext context, {
     double horizontal = 24,
     double vertical = 0,
   }) =>
-      EdgeInsets.symmetric(
-        horizontal: w(context, horizontal),
-        vertical: h(context, vertical),
-      );
+      EdgeInsets.symmetric(horizontal: horizontal.w, vertical: vertical.h);
 
   static bool isSmallScreen(BuildContext context) => width(context) < 360;
 
@@ -42,7 +34,6 @@ class ResponsiveUtils {
 }
 
 extension ResponsiveContext on BuildContext {
-  double get rw => ResponsiveUtils.scale(this);
   double w(double value) => ResponsiveUtils.w(this, value);
   double h(double value) => ResponsiveUtils.h(this, value);
   double sp(double value) => ResponsiveUtils.sp(this, value);

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_colors.dart';
-import '../../../core/theme/app_text_styles.dart';
-import '../../../core/utils/responsive_utils.dart';
+import '../../../generated/assets.dart';
 import 'auth_background.dart';
 
 class AuthScaffold extends StatelessWidget {
@@ -21,60 +21,84 @@ class AuthScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final headerHeight = context.h(showLogo ? 200 : 140);
+    final textTheme = Theme.of(context).textTheme;
+    final topPad = MediaQuery.paddingOf(context).top;
+    final headerHeight = showLogo ? 220.h : 140.h + topPad;
 
     return Scaffold(
-      backgroundColor: AppColors.authPurple,
-      body: Stack(
+      backgroundColor: AppColors.backgroundWhite,
+      body: Column(
         children: [
-          AuthGradientBackground(
-            child: SafeArea(
-              child: SizedBox(
-                height: headerHeight,
-                child: Column(
-                  children: [
-                    if (showBack)
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: Padding(
-                          padding: EdgeInsets.only(left: context.w(16), top: context.h(8)),
-                          child: _BackButton(onTap: () => context.pop()),
+          SizedBox(
+            height: headerHeight,
+            width: double.infinity,
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                Image.asset(AppAssets.bgCommon, fit: BoxFit.cover),
+                SafeArea(
+                  bottom: false,
+                  child: showLogo
+                      ? Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const AuthLogo(size: 56),
+                            SizedBox(height: 10.h),
+                            Text(
+                              'Tap on Task',
+                              style: textTheme.titleLarge?.copyWith(
+                                color: AppColors.textWhite,
+                                fontWeight: FontWeight.w700,
+                                fontSize: 20.sp,
+                              ),
+                            ),
+                          ],
+                        )
+                      : Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 16.w),
+                          child: Row(
+                            children: [
+                              if (showBack)
+                                _BackButton(onTap: () => context.pop())
+                              else
+                                SizedBox(width: 40.w),
+                              Expanded(
+                                child: Text(
+                                  headerTitle ?? '',
+                                  textAlign: TextAlign.center,
+                                  style: textTheme.headlineSmall?.copyWith(
+                                    color: AppColors.textWhite,
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 20.sp,
+                                  ),
+                                ),
+                              ),
+                              SizedBox(width: 40.w),
+                            ],
+                          ),
                         ),
-                      )
-                    else
-                      SizedBox(height: context.h(16)),
-                    if (headerTitle != null)
-                      Text(headerTitle!, style: AppTextStyles.authHeaderTitle(context)),
-                    if (showLogo) ...[
-                      SizedBox(height: context.h(16)),
-                      const AuthLogo(),
-                      SizedBox(height: context.h(12)),
-                      Text('Tap on Task', style: AppTextStyles.splashTitle(context)),
-                    ],
-                  ],
                 ),
-              ),
+              ],
             ),
           ),
-          Positioned(
-            top: headerHeight - context.h(24),
-            left: 0,
-            right: 0,
-            bottom: 0,
-            child: Container(
-              decoration: BoxDecoration(
-                color: AppColors.backgroundWhite,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(context.r(32))),
-              ),
-              child: SafeArea(
-                top: false,
+          Expanded(
+            child: Transform.translate(
+              offset: Offset(0, -28.h),
+              child: Container(
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: AppColors.backgroundWhite,
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(40.r)),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.06),
+                      blurRadius: 20.r,
+                      offset: Offset(0, -4.h),
+                    ),
+                  ],
+                ),
                 child: SingleChildScrollView(
-                  padding: EdgeInsets.fromLTRB(
-                    context.w(24),
-                    context.h(28),
-                    context.w(24),
-                    context.h(24),
-                  ),
+                  padding: EdgeInsets.fromLTRB(24.w, 32.h, 24.w, 24.h),
                   child: child,
                 ),
               ),
@@ -95,19 +119,19 @@ class _BackButton extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: context.w(40),
-        height: context.w(40),
+        width: 40.w,
+        height: 40.w,
         decoration: const BoxDecoration(
           color: AppColors.textWhite,
           shape: BoxShape.circle,
         ),
-        child: Icon(Icons.chevron_left_rounded, color: AppColors.authNavy, size: context.w(24)),
+        child: Icon(Icons.chevron_left_rounded, color: AppColors.authNavy, size: 24.sp),
       ),
     );
   }
 }
 
-/// Full-screen gradient scaffold for splash & role selection.
+/// Full-screen scaffold for splash screen only.
 class AuthFullScaffold extends StatelessWidget {
   final Widget child;
   const AuthFullScaffold({super.key, required this.child});
@@ -115,9 +139,7 @@ class AuthFullScaffold extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: AuthGradientBackground(
-        child: SafeArea(child: child),
-      ),
+      body: SplashBackground(child: SafeArea(child: child)),
     );
   }
 }

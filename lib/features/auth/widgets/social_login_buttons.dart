@@ -1,12 +1,12 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/models/user_model.dart';
 import '../../../core/services/auth_service.dart';
-import '../../../core/theme/app_text_styles.dart';
-import '../../../core/utils/responsive_utils.dart';
+import '../../../generated/assets.dart';
 import '../providers/auth_form_provider.dart';
 
 class SocialLoginButtons extends StatelessWidget {
@@ -14,6 +14,7 @@ class SocialLoginButtons extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
     final auth = context.watch<AuthService>();
     final form = context.read<AuthFormProvider>();
     final showApple = !Platform.isAndroid;
@@ -37,10 +38,10 @@ class SocialLoginButtons extends StatelessWidget {
       children: [
         if (!auth.firebaseReady)
           Padding(
-            padding: EdgeInsets.only(bottom: context.h(12)),
+            padding: EdgeInsets.only(bottom: 12.h),
             child: Text(
               'Social login requires Firebase. Check your configuration.',
-              style: TextStyle(color: AppColors.error, fontSize: context.sp(12)),
+              style: textTheme.bodySmall?.copyWith(color: AppColors.error, fontSize: 12.sp),
               textAlign: TextAlign.center,
             ),
           ),
@@ -49,7 +50,7 @@ class SocialLoginButtons extends StatelessWidget {
             if (showApple) ...[
               Expanded(
                 child: _SocialButton(
-                  icon: Icons.apple_rounded,
+                  assetIcon: AppAssets.appleIcon,
                   label: 'Apple',
                   onTap: !auth.firebaseReady || auth.isLoading
                       ? showFirebaseError
@@ -59,11 +60,11 @@ class SocialLoginButtons extends StatelessWidget {
                         },
                 ),
               ),
-              SizedBox(width: context.w(12)),
+              SizedBox(width: 12.w),
             ],
             Expanded(
               child: _SocialButton(
-                icon: Icons.g_mobiledata_rounded,
+                assetIcon: AppAssets.googleIcon,
                 label: 'Google',
                 onTap: !auth.firebaseReady || auth.isLoading
                     ? showFirebaseError
@@ -81,32 +82,41 @@ class SocialLoginButtons extends StatelessWidget {
 }
 
 class _SocialButton extends StatelessWidget {
-  final IconData icon;
+  final String assetIcon;
   final String label;
   final VoidCallback? onTap;
 
   const _SocialButton({
-    required this.icon,
+    required this.assetIcon,
     required this.label,
     this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        height: context.h(48),
+        height: 48.h,
         decoration: BoxDecoration(
           color: AppColors.authInputBg,
-          borderRadius: BorderRadius.circular(context.r(12)),
+          borderRadius: BorderRadius.circular(12.r),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: context.w(22), color: AppColors.textPrimary),
-            SizedBox(width: context.w(8)),
-            Text(label, style: AppTextStyles.socialButton(context)),
+            Image.asset(assetIcon, width: 20.w, height: 20.w, fit: BoxFit.contain),
+            SizedBox(width: 8.w),
+            Text(
+              label,
+              style: textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.w500,
+                fontSize: 14.sp,
+                color: AppColors.textPrimary,
+              ),
+            ),
           ],
         ),
       ),

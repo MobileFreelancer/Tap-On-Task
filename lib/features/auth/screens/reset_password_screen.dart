@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-import '../../../core/services/auth_service.dart';
-import '../../../core/theme/app_text_styles.dart';
-import '../../../core/utils/responsive_utils.dart';
+import '../../../core/constants/app_colors.dart';
 import '../providers/auth_form_provider.dart';
 import '../widgets/auth_input_field.dart';
 import '../widgets/auth_scaffold.dart';
@@ -14,8 +13,8 @@ class ResetPasswordScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
     final form = context.watch<AuthFormProvider>();
-    final auth = context.watch<AuthService>();
 
     return AuthScaffold(
       headerTitle: 'Reset Password',
@@ -24,29 +23,23 @@ class ResetPasswordScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text('Create New Password', style: AppTextStyles.authCardTitle(context)),
-          SizedBox(height: context.h(12)),
-          Text(
-            'Create a new password for your account',
-            style: AppTextStyles.authSubtitle(context),
-          ),
-          SizedBox(height: context.h(28)),
+          SizedBox(height: 28.h),
           AuthPasswordField(
             hint: 'New Password',
             controller: form.passwordController,
             obscure: form.obscurePassword,
             onToggle: () => context.read<AuthFormProvider>().togglePasswordVisibility(),
           ),
+          SizedBox(height: 20.h),
           AuthPasswordField(
             hint: 'Confirm New Password',
             controller: form.confirmPasswordController,
             obscure: form.obscureConfirmPassword,
             onToggle: () => context.read<AuthFormProvider>().toggleConfirmPasswordVisibility(),
           ),
-          SizedBox(height: context.h(20)),
+          SizedBox(height: 20.h),
           AuthPrimaryButton(
-            label: 'Reset Password',
-            isLoading: auth.isLoading,
+            label: 'Back to Login',
             onPressed: () => _handleReset(context),
           ),
         ],

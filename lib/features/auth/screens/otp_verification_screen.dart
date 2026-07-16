@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/services/auth_service.dart';
-import '../../../core/theme/app_text_styles.dart';
-import '../../../core/utils/responsive_utils.dart';
 import '../providers/auth_form_provider.dart';
 import '../widgets/auth_input_field.dart';
 import '../widgets/auth_scaffold.dart';
@@ -16,6 +15,7 @@ class OtpVerificationScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
     final form = context.watch<AuthFormProvider>();
     final auth = context.watch<AuthService>();
 
@@ -32,45 +32,66 @@ class OtpVerificationScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          SizedBox(height: 20.h),
           Text(
             'Verification code is received via email or phone.',
-            style: AppTextStyles.authSubtitle(context),
+            style: textTheme.bodyMedium?.copyWith(
+              color: AppColors.textGray500,
+              fontSize: 14.sp,
+              height: 1.5,
+            ),
             textAlign: TextAlign.center,
           ),
-          SizedBox(height: context.h(32)),
+          SizedBox(height: 32.h),
           OtpInputRow(
             digits: form.otpDigits,
             onChanged: (i, v) => context.read<AuthFormProvider>().setOtpDigit(i, v),
           ),
-          SizedBox(height: context.h(24)),
+          SizedBox(height: 24.h),
           Center(
             child: form.canResend
                 ? GestureDetector(
                     onTap: () => context.read<AuthFormProvider>().startResendTimer(),
                     child: Text.rich(
                       TextSpan(
-                        style: AppTextStyles.authBody(context),
+                        style: textTheme.bodySmall?.copyWith(
+                          color: AppColors.authNavy,
+                          fontSize: 13.sp,
+                        ),
                         children: [
-                          const TextSpan(text: "Didn't get the Code "),
-                          TextSpan(text: 'Resend', style: AppTextStyles.authLink(context)),
+                          const TextSpan(text: "Didn't get the Code? "),
+                          TextSpan(
+                            text: 'Resend',
+                            style: textTheme.labelLarge?.copyWith(
+                              color: AppColors.authPurple,
+                              fontSize: 13.sp,
+                            ),
+                          ),
                         ],
                       ),
                     ),
                   )
                 : Text(
                     'Resend code in ${form.resendSeconds} seconds',
-                    style: AppTextStyles.authBody(context),
+                    style: textTheme.bodySmall?.copyWith(
+                      color: AppColors.textGray500,
+                      fontSize: 13.sp,
+                    ),
                   ),
           ),
-          SizedBox(height: context.h(28)),
+          SizedBox(height: 28.h),
           AuthPrimaryButton(
             label: 'Verify',
             isLoading: auth.isLoading,
             onPressed: form.isOtpComplete ? () => _handleVerify(context) : null,
           ),
           if (auth.error != null) ...[
-            SizedBox(height: context.h(12)),
-            Text(auth.error!, style: TextStyle(color: AppColors.error, fontSize: context.sp(13)), textAlign: TextAlign.center),
+            SizedBox(height: 12.h),
+            Text(
+              auth.error!,
+              style: textTheme.bodySmall?.copyWith(color: AppColors.error, fontSize: 13.sp),
+              textAlign: TextAlign.center,
+            ),
           ],
         ],
       ),

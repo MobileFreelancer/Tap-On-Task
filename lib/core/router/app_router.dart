@@ -174,19 +174,21 @@ class AppRouter {
   static GoRouter get router => _router;
 
   static int _customerNavIndex(String path) {
-    if (path.startsWith('/customer/search')) return 1;
-    if (path.startsWith('/customer/my-tasks')) return 2;
-    if (path.startsWith('/customer/messages')) return 3;
+    if (path.startsWith('/customer/post-task')) return 0;
+    if (path.startsWith('/categories')) return 1;
+    if (path.startsWith('/customer/dashboard')) return 2;
+    if (path.startsWith('/help')) return 3;
     if (path.startsWith('/profile')) return 4;
-    return 0;
+    return 2;
   }
 
   static int _traderNavIndex(String path) {
-    if (path.startsWith('/trader/available-tasks')) return 1;
-    if (path.startsWith('/trader/my-bids')) return 2;
-    if (path.startsWith('/trader/messages')) return 3;
+    if (path.startsWith('/trader/available-tasks')) return 0;
+    if (path.startsWith('/categories')) return 1;
+    if (path.startsWith('/trader/dashboard')) return 2;
+    if (path.startsWith('/help')) return 3;
     if (path.startsWith('/trader/profile')) return 4;
-    return 0;
+    return 2;
   }
 
   static String? _authGuard(BuildContext context, GoRouterState state) {

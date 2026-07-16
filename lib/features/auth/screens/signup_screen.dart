@@ -1,12 +1,11 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/models/user_model.dart';
 import '../../../core/services/auth_service.dart';
-import '../../../core/theme/app_text_styles.dart';
-import '../../../core/utils/responsive_utils.dart';
 import '../providers/auth_form_provider.dart';
 import '../widgets/auth_input_field.dart';
 import '../widgets/auth_scaffold.dart';
@@ -18,6 +17,7 @@ class SignupScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
     final form = context.watch<AuthFormProvider>();
     final auth = context.watch<AuthService>();
 
@@ -32,63 +32,90 @@ class SignupScreen extends StatelessWidget {
     return AuthScaffold(
       showLogo: true,
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Center(child: Text('Register', style: AppTextStyles.authCardTitle(context))),
-          SizedBox(height: context.h(24)),
+          Text(
+            'Register',
+            textAlign: TextAlign.center,
+            style: textTheme.headlineMedium?.copyWith(
+              color: AppColors.authNavy,
+              fontWeight: FontWeight.w700,
+              fontSize: 24.sp,
+            ),
+          ),
+          SizedBox(height: 28.h),
           AuthInputField(
             hint: 'Name',
             icon: Icons.person_outline_rounded,
             controller: form.nameController,
           ),
+          SizedBox(height: 14.h),
           AuthInputField(
             hint: 'Email',
             icon: Icons.email_outlined,
             controller: form.emailController,
             keyboardType: TextInputType.emailAddress,
           ),
+          SizedBox(height: 14.h),
           AuthPasswordField(
             hint: 'Password',
             controller: form.passwordController,
             obscure: form.obscurePassword,
             onToggle: () => context.read<AuthFormProvider>().togglePasswordVisibility(),
           ),
+          SizedBox(height: 14.h),
           AuthInputField(
             hint: 'Phone Number',
+            maxLength: 10,
             icon: Icons.phone_outlined,
             controller: form.phoneController,
             keyboardType: TextInputType.phone,
           ),
-          SizedBox(height: context.h(4)),
+          SizedBox(height: 8.h),
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               SizedBox(
-                width: context.w(24),
-                height: context.w(24),
+                width: 22.w,
+                height: 22.w,
                 child: Checkbox(
                   value: form.termsAccepted,
                   onChanged: (v) => context.read<AuthFormProvider>().setTermsAccepted(v ?? false),
                   activeColor: AppColors.authPurple,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+                  side: const BorderSide(color: AppColors.borderMedium),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4.r)),
+                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 ),
               ),
-              SizedBox(width: context.w(8)),
+              SizedBox(width: 10.w),
               Expanded(
                 child: Text.rich(
                   TextSpan(
-                    style: AppTextStyles.authBody(context),
+                    style: textTheme.bodySmall?.copyWith(
+                      color: AppColors.textGray500,
+                      fontSize: 12.sp,
+                      height: 1.4,
+                    ),
                     children: [
                       const TextSpan(text: 'By continuing, you agree to the '),
                       TextSpan(
                         text: 'Terms & conditions',
-                        style: AppTextStyles.authLink(context).copyWith(fontSize: context.sp(13)),
+                        style: textTheme.labelLarge?.copyWith(
+                          color: AppColors.authPurple,
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.w500,
+                        ),
                         recognizer: TapGestureRecognizer()..onTap = () {},
                       ),
                       const TextSpan(text: ' and '),
                       TextSpan(
                         text: 'Privacy Policy',
-                        style: AppTextStyles.authLink(context).copyWith(fontSize: context.sp(13)),
+                        style: textTheme.labelLarge?.copyWith(
+                          color: AppColors.authPurple,
+                          fontSize: 12.sp,
+                          fontWeight: FontWeight.w500,
+                        ),
                         recognizer: TapGestureRecognizer()..onTap = () {},
                       ),
                     ],
@@ -97,28 +124,39 @@ class SignupScreen extends StatelessWidget {
               ),
             ],
           ),
-          SizedBox(height: context.h(20)),
+          SizedBox(height: 20.h),
           AuthPrimaryButton(
             label: 'Register',
             isLoading: auth.isLoading,
             onPressed: () => _handleSignup(context),
           ),
           if (auth.error != null) ...[
-            SizedBox(height: context.h(12)),
-            Text(auth.error!, style: TextStyle(color: AppColors.error, fontSize: context.sp(13)), textAlign: TextAlign.center),
+            SizedBox(height: 12.h),
+            Text(
+              auth.error!,
+              style: textTheme.bodySmall?.copyWith(color: AppColors.error, fontSize: 13.sp),
+              textAlign: TextAlign.center,
+            ),
           ],
           const AuthDivider(),
           const SocialLoginButtons(),
-          SizedBox(height: context.h(20)),
+          SizedBox(height: 24.h),
           Center(
             child: Text.rich(
               TextSpan(
-                style: AppTextStyles.authBody(context),
+                style: textTheme.bodySmall?.copyWith(
+                  color: AppColors.textGray500,
+                  fontSize: 13.sp,
+                ),
                 children: [
                   const TextSpan(text: 'Already have an account? '),
                   TextSpan(
                     text: 'Sign in',
-                    style: AppTextStyles.authLink(context),
+                    style: textTheme.labelLarge?.copyWith(
+                      color: AppColors.authPurple,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 13.sp,
+                    ),
                     recognizer: TapGestureRecognizer()
                       ..onTap = () => context.pushNamed('login', queryParameters: {'role': form.selectedRole.name}),
                   ),

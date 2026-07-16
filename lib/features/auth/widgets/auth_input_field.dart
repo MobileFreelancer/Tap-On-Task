@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../core/constants/app_colors.dart';
-import '../../../core/theme/app_text_styles.dart';
-import '../../../core/utils/responsive_utils.dart';
 
 class AuthInputField extends StatelessWidget {
   final String hint;
@@ -10,12 +9,14 @@ class AuthInputField extends StatelessWidget {
   final bool obscureText;
   final TextInputType keyboardType;
   final Widget? suffix;
+  final int? maxLength;
 
   const AuthInputField({
     super.key,
     required this.hint,
     required this.icon,
     required this.controller,
+     this.maxLength,
     this.obscureText = false,
     this.keyboardType = TextInputType.text,
     this.suffix,
@@ -23,38 +24,44 @@ class AuthInputField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: EdgeInsets.only(bottom: context.h(14)),
-      decoration: BoxDecoration(
-        color: AppColors.authInputBg,
-        borderRadius: BorderRadius.circular(context.r(12)),
+    final textTheme = Theme.of(context).textTheme;
+
+    return TextField(
+      controller: controller,
+      obscureText: obscureText,
+      keyboardType: keyboardType,
+      style: textTheme.bodyMedium?.copyWith(
+        fontSize: 14.sp,
+        color: AppColors.textPrimary,
       ),
-      child: Row(
-        children: [
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: context.w(14)),
-            child: Icon(icon, color: AppColors.authPurple, size: context.w(20)),
+      maxLength:maxLength ,
+      decoration: InputDecoration(
+        hintText: hint,
+        counterText: "",
+        fillColor: AppColors.textGrayF9,
+        filled: true,
+        hintStyle: textTheme.bodyMedium?.copyWith(
+          color: AppColors.textGray400,
+          fontSize: 14.sp,
+        ),
+        prefixIcon: Container(
+          width: 50.w,
+          child: Row(
+            children: [
+              Expanded(child: Icon(icon, color: AppColors.authPurple, size: 20.sp)),
+              VerticalDivider(color: AppColors.black.withValues(alpha: 0.03),),
+            ],
           ),
-          Container(width: 1, height: context.h(24), color: AppColors.borderLight),
-          Expanded(
-            child: TextField(
-              controller: controller,
-              obscureText: obscureText,
-              keyboardType: keyboardType,
-              style: AppTextStyles.authInputText(context),
-              decoration: InputDecoration(
-                hintText: hint,
-                hintStyle: AppTextStyles.authInputHint(context),
-                border: InputBorder.none,
-                contentPadding: EdgeInsets.symmetric(
-                  horizontal: context.w(14),
-                  vertical: context.h(16),
-                ),
-                suffixIcon: suffix,
-              ),
-            ),
-          ),
-        ],
+        ) ,
+        border: InputBorder.none,
+        isDense: true,
+        contentPadding: EdgeInsets.zero,
+        suffixIcon: suffix,
+        focusedBorder: OutlineInputBorder(borderSide: BorderSide(width: 1,color: AppColors.primaryLight),borderRadius: BorderRadius.all(Radius.circular(10.w))),
+        disabledBorder: OutlineInputBorder(borderSide: BorderSide(color: AppColors.black.withValues(alpha: 0.03)),borderRadius: BorderRadius.all(Radius.circular(10.w))),
+        enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: AppColors.black.withValues(alpha: 0.03)),borderRadius: BorderRadius.all(Radius.circular(10.w))),
+        errorBorder: OutlineInputBorder(borderSide: BorderSide(color: AppColors.accentRed),borderRadius: BorderRadius.all(Radius.circular(10.w))),
+        suffixIconConstraints: BoxConstraints(minWidth: 40.w, minHeight: 40.h),
       ),
     );
   }
@@ -81,13 +88,13 @@ class AuthPasswordField extends StatelessWidget {
       icon: Icons.lock_outline_rounded,
       controller: controller,
       obscureText: obscure,
-      suffix: IconButton(
-        icon: Icon(
+      suffix: GestureDetector(
+        onTap: onToggle,
+        child: Icon(
           obscure ? Icons.visibility_off_outlined : Icons.visibility_outlined,
-          color: AppColors.authPurple,
-          size: context.w(20),
+          color: AppColors.textGray400,
+          size: 20.sp,
         ),
-        onPressed: onToggle,
       ),
     );
   }
@@ -107,25 +114,33 @@ class AuthPrimaryButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+
     return SizedBox(
       width: double.infinity,
-      height: context.h(52),
+      height: 52.h,
       child: ElevatedButton(
         onPressed: isLoading ? null : onPressed,
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.authNavy,
           foregroundColor: AppColors.textWhite,
           elevation: 0,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(context.r(12))),
-          textStyle: AppTextStyles.authButton(context),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
         ),
         child: isLoading
             ? SizedBox(
-                width: context.w(24),
-                height: context.w(24),
+                width: 24.w,
+                height: 24.w,
                 child: const CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
               )
-            : Text(label),
+            : Text(
+                label,
+                style: textTheme.labelLarge?.copyWith(
+                  color: AppColors.textWhite,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 16.sp,
+                ),
+              ),
       ),
     );
   }
@@ -137,16 +152,24 @@ class AuthDivider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: context.h(20)),
+      padding: EdgeInsets.symmetric(vertical: 20.h),
       child: Row(
         children: [
-          const Expanded(child: Divider(color: AppColors.borderLight)),
+          const Expanded(child: Divider(color: AppColors.borderLight, thickness: 1)),
           Padding(
-            padding: EdgeInsets.symmetric(horizontal: context.w(12)),
-            child: Text(text, style: AppTextStyles.authDivider(context)),
+            padding: EdgeInsets.symmetric(horizontal: 12.w),
+            child: Text(
+              text,
+              style: textTheme.bodySmall?.copyWith(
+                color: AppColors.textGray400,
+                fontSize: 12.sp,
+              ),
+            ),
           ),
-          const Expanded(child: Divider(color: AppColors.borderLight)),
+          const Expanded(child: Divider(color: AppColors.borderLight, thickness: 1)),
         ],
       ),
     );
@@ -161,29 +184,35 @@ class OtpInputRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: List.generate(6, (index) {
         return SizedBox(
-          width: context.w(48),
-          height: context.h(56),
+          width: 48.w,
+          height: 56.h,
           child: TextFormField(
             key: ValueKey('otp_${index}_${digits[index]}'),
             initialValue: digits[index].isEmpty ? null : digits[index],
             textAlign: TextAlign.center,
             keyboardType: TextInputType.number,
             maxLength: 1,
-            style: AppTextStyles.otpDigit(context),
+            style: textTheme.headlineSmall?.copyWith(
+              color: AppColors.authNavy,
+              fontWeight: FontWeight.w700,
+              fontSize: 22.sp,
+            ),
             decoration: InputDecoration(
               counterText: '',
               filled: true,
               fillColor: AppColors.authInputBg,
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(context.r(10)),
+                borderRadius: BorderRadius.circular(10.r),
                 borderSide: BorderSide.none,
               ),
               focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(context.r(10)),
+                borderRadius: BorderRadius.circular(10.r),
                 borderSide: const BorderSide(color: AppColors.authPurple, width: 2),
               ),
             ),

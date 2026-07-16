@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class AppColors {
   AppColors._();
 
-  static const Color primaryPurple = Color(0xFF7D30FF);
+  static const Color primaryPurple = Color(0xFF6B27DC);
   static const Color primaryDark = Color(0xFF5B21B6);
   static const Color primaryLight = Color(0xFFD9BFFF);
   static const Color primarySurface = Color(0xFFEDE9FE);
@@ -11,7 +11,7 @@ class AppColors {
   // Auth-specific palette (from Figma)
   static const Color authPurple = Color(0xFF7D30FF);
   static const Color authPurpleLight = Color(0xFFD9BFFF);
-  static const Color authNavy = Color(0xFF1B1B3A);
+  static const Color authNavy = Color(0xFF002F4B);
   static const Color authInputBg = Color(0xFFF5F5F5);
   static const Color textWhite = Color(0xFFFFFFFF);
 
@@ -28,12 +28,14 @@ class AppColors {
 
   static const Color backgroundOffWhite = Color(0xFFF7F4EF);
   static const Color backgroundWhite = Color(0xFFFFFFFF);
-  static const Color backgroundGray = Color(0xFFF3F4F6);
+  static const Color backgroundGray = Color(0xFFF7F6F9);
+  static const Color black = Color(0xFF000000);
 
   static const Color textPrimary = Color(0xFF111827);
   static const Color textSecondary = Color(0xFF6B7280);
-  static const Color textGray400 = Color(0xFF9CA3AF);
-  static const Color textGray500 = Color(0xFF6B7280);
+  static const Color textGray400 = Color(0xFF64666C);
+  static const Color textGrayF9 = Color(0xFFF7F6F9);
+  static const Color textGray500 = Color(0xFF64666C);
   static const Color textGray600 = Color(0xFF4B5563);
   static const Color textGray700 = Color(0xFF374151);
   static const Color textGray900 = Color(0xFF111827);

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/models/user_model.dart';
-import '../../../core/theme/app_text_styles.dart';
-import '../../../core/utils/responsive_utils.dart';
+import '../../../generated/assets.dart';
 import '../providers/auth_form_provider.dart';
 import '../widgets/auth_background.dart';
 import '../widgets/auth_scaffold.dart';
@@ -14,31 +14,39 @@ class RoleSelectionScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
     final form = context.watch<AuthFormProvider>();
 
     return AuthFullScaffold(
       child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: context.w(24)),
+        padding: EdgeInsets.symmetric(horizontal: 24.w),
         child: Column(
           children: [
-            SizedBox(height: context.h(60)),
+            SizedBox(height: 60.h),
             const AuthLogo(size: 80),
-            SizedBox(height: context.h(16)),
-            Text('Tap on Task', style: AppTextStyles.splashTitle(context)),
+            SizedBox(height: 16.h),
+            Text(
+              'Tap on Task',
+              style: textTheme.headlineMedium?.copyWith(
+                color: AppColors.textWhite,
+                fontWeight: FontWeight.w700,
+                fontSize: 28.sp,
+              ),
+            ),
             const Spacer(),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 _RoleCircle(
                   label: 'Customer',
-                  icon: Icons.person_outline_rounded,
+                  iconAsset: AppAssets.customerIcon,
                   isSelected: form.selectedRole == UserRole.customer,
                   onTap: () => context.read<AuthFormProvider>().setRole(UserRole.customer),
                 ),
-                SizedBox(width: context.w(48)),
+                SizedBox(width: 48.w),
                 _RoleCircle(
                   label: 'Trader',
-                  icon: Icons.verified_user_outlined,
+                  iconAsset: AppAssets.traderIcon,
                   isSelected: form.selectedRole == UserRole.trader,
                   onTap: () => context.read<AuthFormProvider>().setRole(UserRole.trader),
                 ),
@@ -50,13 +58,13 @@ class RoleSelectionScreen extends StatelessWidget {
               isOutlined: true,
               onTap: () => context.pushNamed('login', queryParameters: {'role': form.selectedRole.name}),
             ),
-            SizedBox(height: context.h(14)),
+            SizedBox(height: 14.h),
             _AuthChoiceButton(
               label: 'Register',
               isOutlined: false,
               onTap: () => context.pushNamed('signup', queryParameters: {'role': form.selectedRole.name}),
             ),
-            SizedBox(height: context.h(40)),
+            SizedBox(height: 40.h),
           ],
         ),
       ),
@@ -66,41 +74,49 @@ class RoleSelectionScreen extends StatelessWidget {
 
 class _RoleCircle extends StatelessWidget {
   final String label;
-  final IconData icon;
+  final String iconAsset;
   final bool isSelected;
   final VoidCallback onTap;
 
   const _RoleCircle({
     required this.label,
-    required this.icon,
+    required this.iconAsset,
     required this.isSelected,
     required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+
     return GestureDetector(
       onTap: onTap,
       child: Column(
         children: [
           AnimatedContainer(
             duration: const Duration(milliseconds: 200),
-            width: context.w(90),
-            height: context.w(90),
+            width: 90.w,
+            height: 90.w,
+            padding: EdgeInsets.all(20.w),
             decoration: BoxDecoration(
               color: AppColors.textWhite,
               shape: BoxShape.circle,
-              border: isSelected
-                  ? Border.all(color: AppColors.textWhite, width: 3)
-                  : null,
+              border: isSelected ? Border.all(color: AppColors.textWhite, width: 3) : null,
               boxShadow: isSelected
-                  ? [BoxShadow(color: Colors.black.withValues(alpha: 0.15), blurRadius: 12)]
+                  ? [BoxShadow(color: Colors.black.withValues(alpha: 0.15), blurRadius: 12.r)]
                   : null,
             ),
-            child: Icon(icon, size: context.w(36), color: AppColors.authPurple),
+            child: Image.asset(iconAsset, fit: BoxFit.contain),
           ),
-          SizedBox(height: context.h(12)),
-          Text(label, style: AppTextStyles.roleLabel(context)),
+          SizedBox(height: 12.h),
+          Text(
+            label,
+            style: textTheme.bodyMedium?.copyWith(
+              color: AppColors.textWhite,
+              fontWeight: FontWeight.w500,
+              fontSize: 15.sp,
+            ),
+          ),
         ],
       ),
     );
@@ -120,18 +136,26 @@ class _AuthChoiceButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+
     return SizedBox(
       width: double.infinity,
-      height: context.h(52),
+      height: 52.h,
       child: isOutlined
           ? OutlinedButton(
               onPressed: onTap,
               style: OutlinedButton.styleFrom(
                 foregroundColor: AppColors.textWhite,
                 side: const BorderSide(color: AppColors.textWhite, width: 1.5),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(context.r(14))),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14.r)),
               ),
-              child: Text(label, style: AppTextStyles.authButton(context)),
+              child: Text(
+                label,
+                style: textTheme.labelLarge?.copyWith(
+                  color: AppColors.textWhite,
+                  fontSize: 16.sp,
+                ),
+              ),
             )
           : ElevatedButton(
               onPressed: onTap,
@@ -139,9 +163,15 @@ class _AuthChoiceButton extends StatelessWidget {
                 backgroundColor: AppColors.textWhite,
                 foregroundColor: AppColors.authPurple,
                 elevation: 0,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(context.r(14))),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14.r)),
               ),
-              child: Text(label, style: AppTextStyles.authButton(context).copyWith(color: AppColors.authPurple)),
+              child: Text(
+                label,
+                style: textTheme.labelLarge?.copyWith(
+                  color: AppColors.authPurple,
+                  fontSize: 16.sp,
+                ),
+              ),
             ),
     );
   }

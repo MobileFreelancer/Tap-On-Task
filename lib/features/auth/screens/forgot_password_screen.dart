@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import '../../../core/constants/app_colors.dart';
 import '../../../core/services/auth_service.dart';
-import '../../../core/theme/app_text_styles.dart';
-import '../../../core/utils/responsive_utils.dart';
 import '../providers/auth_form_provider.dart';
 import '../widgets/auth_input_field.dart';
 import '../widgets/auth_scaffold.dart';
@@ -13,6 +13,7 @@ class ForgotPasswordScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
     final form = context.watch<AuthFormProvider>();
     final auth = context.watch<AuthService>();
 
@@ -21,22 +22,34 @@ class ForgotPasswordScreen extends StatelessWidget {
       showBack: true,
       showLogo: false,
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text('Recover Password', style: AppTextStyles.authCardTitle(context)),
-          SizedBox(height: context.h(12)),
+          Text(
+            'Recover Password',
+            style: textTheme.headlineMedium?.copyWith(
+              color: AppColors.authNavy,
+              fontWeight: FontWeight.w700,
+              fontSize: 20.sp,
+            ),
+          ),
+          SizedBox(height: 12.h),
           Text(
             "Enter the email address associated with your account, and we'll send you a secure link to reset your password.",
-            style: AppTextStyles.authSubtitle(context),
+            style: textTheme.bodyMedium?.copyWith(
+              color: AppColors.textGray500,
+              fontSize: 14.sp,
+              height: 1.5,
+            ),
           ),
-          SizedBox(height: context.h(28)),
+          SizedBox(height: 28.h),
           AuthInputField(
-            hint: 'Email address',
+            hint: 'Email or phone number',
             icon: Icons.email_outlined,
             controller: form.forgotEmailController,
             keyboardType: TextInputType.emailAddress,
           ),
-          SizedBox(height: context.h(12)),
+          SizedBox(height: 12.h),
           AuthPrimaryButton(
             label: 'Submit',
             isLoading: auth.isLoading,

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'core/utils/responsive_utils.dart';
 import 'core/services/auth_service.dart';
 import 'core/services/firebase_service.dart';
 import 'core/services/task_service.dart';
@@ -52,11 +54,15 @@ class TapOnTaskApp extends StatelessWidget {
       context.read<NotificationService>().fetchNotifications();
     });
 
-    return MaterialApp.router(
-      title: 'Tap On Task',
-      debugShowCheckedModeBanner: false,
-      theme: AppTheme.lightTheme,
-      routerConfig: AppRouter.router,
+    return ScreenUtilInit(
+      designSize: ResponsiveUtils.designSize,
+      minTextAdapt: true,
+      builder: (_, __) => MaterialApp.router(
+        title: 'Tap On Task',
+        debugShowCheckedModeBanner: false,
+        theme: AppTheme.lightTheme,
+        routerConfig: AppRouter.router,
+      ),
     );
   }
 }

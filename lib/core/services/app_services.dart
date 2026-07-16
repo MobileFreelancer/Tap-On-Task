@@ -17,6 +17,7 @@ class HomeService extends ChangeNotifier {
   List<BannerModel> _banners = [];
   List<ServiceCategoryModel> _categories = [];
   List<ServiceModel> _popularServices = [];
+  List<ProviderModel> _nearbyProviders = [];
   List<BookingModel> _recentBookings = [];
   bool _isLoading = false;
   String? _error;
@@ -24,6 +25,7 @@ class HomeService extends ChangeNotifier {
   List<BannerModel> get banners => _banners;
   List<ServiceCategoryModel> get categories => _categories;
   List<ServiceModel> get popularServices => _popularServices;
+  List<ProviderModel> get nearbyProviders => _nearbyProviders;
   List<BookingModel> get recentBookings => _recentBookings;
   bool get isLoading => _isLoading;
   String? get error => _error;
@@ -39,7 +41,8 @@ class HomeService extends ChangeNotifier {
         _banners = AppMockData.banners;
         _categories = AppMockData.categories;
         _popularServices = AppMockData.services;
-        _recentBookings = AppMockData.bookings.take(2).toList();
+        _nearbyProviders = AppMockData.providers;
+        _recentBookings = AppMockData.bookings;
       } else {
         final response = await _api.get('/home');
         final data = response.data as Map<String, dynamic>;
