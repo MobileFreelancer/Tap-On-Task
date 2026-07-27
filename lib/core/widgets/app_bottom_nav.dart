@@ -17,16 +17,16 @@ class AppBottomNav extends StatelessWidget {
   });
 
   static const _customerItems = [
-    _NavItem(iconAsset: AppAssets.bottomBarPostTaskIcon, label: 'Post Task', route: '/customer/post-task', isShell: false, index: 0),
-    _NavItem(iconAsset: AppAssets.bottomBarCategoryIcon, label: 'Categories', route: '/categories', isShell: false, index: 1),
-    _NavItem(iconAsset: AppAssets.bottomBarSupportIcon, label: 'Help & Support', route: '/help', isShell: false, index: 3),
+    _NavItem(iconAsset: AppAssets.bottomBarPostTaskIcon, label: 'Post Task', route: '/customer/post-task', index: 0),
+    _NavItem(iconAsset: AppAssets.bottomBarCategoryIcon, label: 'Categories', route: '/categories', index: 1),
+    _NavItem(iconAsset: AppAssets.bottomBarSupportIcon, label: 'Help & Support', route: '/help', index: 3),
     _NavItem(iconAsset: AppAssets.bottomBarProfileIcon, label: 'Profile', route: '/profile', index: 4),
   ];
 
   static const _traderItems = [
     _NavItem(iconAsset: AppAssets.bottomBarPostTaskIcon, label: 'Tasks', route: '/trader/available-tasks', index: 0),
-    _NavItem(iconAsset: AppAssets.bottomBarCategoryIcon, label: 'Categories', route: '/categories', isShell: false, index: 1),
-    _NavItem(iconAsset: AppAssets.bottomBarSupportIcon, label: 'Help & Support', route: '/help', isShell: false, index: 3),
+    _NavItem(iconAsset: AppAssets.bottomBarCategoryIcon, label: 'Categories', route: '/categories', index: 1),
+    _NavItem(iconAsset: AppAssets.bottomBarSupportIcon, label: 'Help & Support', route: '/help', index: 3),
     _NavItem(iconAsset: AppAssets.bottomBarProfileIcon, label: 'Profile', route: '/trader/profile', index: 4),
   ];
 
@@ -128,11 +128,7 @@ class AppBottomNav extends StatelessWidget {
   }
 
   void _navigate(BuildContext context, _NavItem item) {
-    if (item.isShell) {
-      context.go(item.route);
-    } else {
-      context.push(item.route);
-    }
+    context.go(item.route);
   }
 }
 
@@ -241,14 +237,12 @@ class _NavItem {
   final String label;
   final String route;
   final int index;
-  final bool isShell;
 
   const _NavItem({
     required this.iconAsset,
     required this.label,
     required this.route,
     required this.index,
-    this.isShell = true,
   });
 }
 

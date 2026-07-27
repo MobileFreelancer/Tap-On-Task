@@ -76,10 +76,15 @@ class AppRouter {
         },
         routes: [
           GoRoute(path: '/customer/dashboard', name: 'customerDashboard', builder: (_, _) => const HomeScreen()),
+          GoRoute(path: '/customer/post-task', name: 'postTask', builder: (_, _) => const PostTaskScreen()),
+          GoRoute(path: '/categories', name: 'categories', builder: (_, _) => const CategoriesScreen()),
+          GoRoute(path: '/help', name: 'help', builder: (_, _) => const HelpSupportScreen()),
+          GoRoute(path: '/profile', name: 'profile', builder: (_, _) => const ProfileScreen()),
+          
+          // These remain in shell for seamless tab switching if navigated to
           GoRoute(path: '/customer/search', name: 'search', builder: (_, _) => const SearchScreen()),
           GoRoute(path: '/customer/my-tasks', name: 'myTasks', builder: (_, _) => const MyTasksScreen()),
           GoRoute(path: '/customer/messages', name: 'messages', builder: (_, _) => const MessagesScreen()),
-          GoRoute(path: '/profile', name: 'profile', builder: (_, _) => const ProfileScreen()),
         ],
       ),
 
@@ -99,8 +104,6 @@ class AppRouter {
       ),
 
       // ----- Feature Routes (outside shell) -----
-      GoRoute(path: '/customer/post-task', name: 'postTask', builder: (_, _) => const PostTaskScreen()),
-      GoRoute(path: '/categories', name: 'categories', builder: (_, _) => const CategoriesScreen()),
       GoRoute(
         path: '/service-listing',
         name: 'serviceListing',
@@ -162,7 +165,6 @@ class AppRouter {
       ),
       GoRoute(path: '/wallet', name: 'wallet', builder: (_, _) => const WalletScreen()),
       GoRoute(path: '/notifications', name: 'notifications', builder: (_, _) => const NotificationsScreen()),
-      GoRoute(path: '/help', name: 'help', builder: (_, _) => const HelpSupportScreen()),
       GoRoute(
         path: '/task/:taskId',
         name: 'taskDetail',
