@@ -280,7 +280,7 @@ class _SelectLocationScreenState extends State<SelectLocationScreen> {
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton(
-        onPressed: () => context.pop(),
+        onPressed: () => context.pushNamed('postTask'),
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.authPurple,
           foregroundColor: Colors.white,

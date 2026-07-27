@@ -161,7 +161,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => context.pushNamed('postTask'),
+        onPressed: () => context.goNamed('postTask'),
         backgroundColor: AppColors.authPurple,
         child: const Icon(Icons.add_rounded, color: Colors.white, size: 30),
       ),

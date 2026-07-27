@@ -81,10 +81,36 @@ class AppRouter {
           GoRoute(path: '/help', name: 'help', builder: (_, _) => const HelpSupportScreen()),
           GoRoute(path: '/profile', name: 'profile', builder: (_, _) => const ProfileScreen()),
           
-          // These remain in shell for seamless tab switching if navigated to
+          // Flow Screens (keep bottom bar)
+          GoRoute(
+            path: '/service-listing',
+            name: 'serviceListing',
+            builder: (_, state) => ServiceListingScreen(
+              categoryId: state.uri.queryParameters['categoryId'] ?? '',
+              categoryName: state.uri.queryParameters['categoryName'] ?? 'Services',
+            ),
+          ),
+          GoRoute(
+            path: '/location-select',
+            name: 'locationSelect',
+            builder: (_, state) => const SelectLocationScreen(),
+          ),
+          GoRoute(
+            path: '/matching-traders/:taskId',
+            name: 'matchingTraders',
+            builder: (_, state) => MatchingTradersScreen(taskId: state.pathParameters['taskId']!),
+          ),
+          GoRoute(
+            path: '/quotes/:taskId',
+            name: 'quotes',
+            builder: (_, state) => QuotesScreen(taskId: state.pathParameters['taskId']!),
+          ),
+          
           GoRoute(path: '/customer/search', name: 'search', builder: (_, _) => const SearchScreen()),
           GoRoute(path: '/customer/my-tasks', name: 'myTasks', builder: (_, _) => const MyTasksScreen()),
           GoRoute(path: '/customer/messages', name: 'messages', builder: (_, _) => const MessagesScreen()),
+          GoRoute(path: '/wallet', name: 'wallet', builder: (_, _) => const WalletScreen()),
+          GoRoute(path: '/notifications', name: 'notifications', builder: (_, _) => const NotificationsScreen()),
         ],
       ),
 
@@ -105,14 +131,6 @@ class AppRouter {
 
       // ----- Feature Routes (outside shell) -----
       GoRoute(
-        path: '/service-listing',
-        name: 'serviceListing',
-        builder: (_, state) => ServiceListingScreen(
-          categoryId: state.uri.queryParameters['categoryId'] ?? '',
-          categoryName: state.uri.queryParameters['categoryName'] ?? 'Services',
-        ),
-      ),
-      GoRoute(
         path: '/service/:serviceId',
         name: 'serviceDetail',
         builder: (_, state) => ServiceDetailScreen(serviceId: state.pathParameters['serviceId']!),
@@ -121,16 +139,6 @@ class AppRouter {
         path: '/provider/:providerId',
         name: 'providerDetail',
         builder: (_, state) => ProviderDetailScreen(providerId: state.pathParameters['providerId']!),
-      ),
-      GoRoute(
-        path: '/location-select',
-        name: 'locationSelect',
-        builder: (_, state) => const SelectLocationScreen(),
-      ),
-      GoRoute(
-        path: '/matching-traders/:taskId',
-        name: 'matchingTraders',
-        builder: (_, state) => MatchingTradersScreen(taskId: state.pathParameters['taskId']!),
       ),
       GoRoute(
         path: '/booking-details',
@@ -146,11 +154,6 @@ class AppRouter {
       ),
       GoRoute(path: '/booking-success', name: 'bookingSuccess', builder: (_, _) => const BookingSuccessScreen()),
       GoRoute(
-        path: '/quotes/:taskId',
-        name: 'quotes',
-        builder: (_, state) => QuotesScreen(taskId: state.pathParameters['taskId']!),
-      ),
-      GoRoute(
         path: '/tracking/:bookingId',
         name: 'tracking',
         builder: (_, state) => TrackingScreen(bookingId: state.pathParameters['bookingId']!),
@@ -163,8 +166,6 @@ class AppRouter {
           bookingId: state.uri.queryParameters['bookingId'] ?? '',
         ),
       ),
-      GoRoute(path: '/wallet', name: 'wallet', builder: (_, _) => const WalletScreen()),
-      GoRoute(path: '/notifications', name: 'notifications', builder: (_, _) => const NotificationsScreen()),
       GoRoute(
         path: '/task/:taskId',
         name: 'taskDetail',
@@ -179,7 +180,11 @@ class AppRouter {
 
   static int _customerNavIndex(String path) {
     if (path.startsWith('/customer/post-task')) return 0;
-    if (path.startsWith('/categories')) return 1;
+    if (path.startsWith('/categories') || 
+        path.startsWith('/service-listing') || 
+        path.startsWith('/location-select') ||
+        path.startsWith('/matching-traders') ||
+        path.startsWith('/quotes')) return 1;
     if (path.startsWith('/customer/dashboard')) return 2;
     if (path.startsWith('/help')) return 3;
     if (path.startsWith('/profile')) return 4;

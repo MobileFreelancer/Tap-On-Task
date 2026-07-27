@@ -180,18 +180,25 @@ class SignupScreen extends StatelessWidget {
       return;
     }
 
-    final success = await auth.signup(
-      phone: form.phoneController.text.trim(),
-      password: form.passwordController.text,
-      role: form.selectedRole,
+    final otp = await auth.signup(
       name: form.nameController.text.trim(),
       email: form.emailController.text.trim(),
+      phone: form.phoneController.text.trim(),
+      password: form.passwordController.text,
     );
 
-    if (success && context.mounted) {
-      form.initOtpFlow(contact: form.phoneController.text.trim(), flow: 'verify');
+    if (otp != null && context.mounted) {
+      final email = form.emailController.text.trim();
+      form.initOtpFlow(contact: email, flow: 'verify');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('OTP sent successfully: $otp'),
+          duration: const Duration(seconds: 8),
+          backgroundColor: AppColors.authPurple,
+        ),
+      );
       context.pushNamed('verifyOtp', queryParameters: {
-        'phone': form.phoneController.text.trim(),
+        'phone': email,
         'flow': 'verify',
       });
     }

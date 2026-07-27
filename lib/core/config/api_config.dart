@@ -6,10 +6,10 @@ enum Environment { development, staging, production }
 
 class ApiConfig {
   static DataSourceType get dataSourceType {
-    const value = String.fromEnvironment('DATA_SOURCE');
-    if (value == 'api') return DataSourceType.api;
+    const value = String.fromEnvironment('DATA_SOURCE', defaultValue: 'api');
+    if (value == 'mock') return DataSourceType.mock;
     if (value == 'firebase') return DataSourceType.firebase;
-    return DataSourceType.mock;
+    return DataSourceType.api;
   }
 
   static bool get useFirebase => dataSourceType == DataSourceType.firebase;
@@ -17,14 +17,21 @@ class ApiConfig {
   static bool get useMock => dataSourceType == DataSourceType.mock;
 
   /// When true, email/password auth uses Firebase instead of mock/API.
-  static bool get useFirebaseAuth => !useMock;
+  static bool get useFirebaseAuth => !useMock && !useApi; // Disable firebase auth when using custom API
 
   static String get baseUrl {
+    String url;
     const dartDefine = String.fromEnvironment('BASE_URL');
-    if (dartDefine.isNotEmpty) return dartDefine;
-    final envVal = dotenv.env['BASE_URL'];
-    if (envVal != null && envVal.isNotEmpty) return envVal;
-    return 'https://api.tapontask.com';
+    if (dartDefine.isNotEmpty) {
+      url = dartDefine;
+    } else {
+      url = dotenv.env['BASE_URL'] ?? 'https://tot.nkm.mjm.mybluehost.me';
+    }
+    
+    if (url.endsWith('/')) {
+      url = url.substring(0, url.length - 1);
+    }
+    return '$url/api/v1/';
   }
 
   static Environment get currentEnvironment {

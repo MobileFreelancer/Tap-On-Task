@@ -8,6 +8,7 @@ class AppAssets {
   static const String logo = '$_iconPath/app_icon.png';
   static const String bgCommon = '$_imagePath/bg_common.png';
   static const String splashBg = '$_imagePath/splash_bg.png';
+  static const String mockMap = '$_imagePath/mock_map.png';
 
   static const String traderIcon = '$_imagePath/trader_icon.png';
   static const String customerIcon = '$_imagePath/customer_icon.png';

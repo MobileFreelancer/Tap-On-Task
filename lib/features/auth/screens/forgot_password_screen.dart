@@ -71,20 +71,16 @@ class ForgotPasswordScreen extends StatelessWidget {
       return;
     }
 
-    if (auth.firebaseReady && email.contains('@')) {
-      final success = await auth.sendPasswordResetEmail(email);
-      if (!context.mounted) return;
-      if (success) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Password reset link sent to your email.')),
-        );
-        context.pop();
-      }
-      return;
-    }
-
-    form.initOtpFlow(contact: email, flow: 'reset');
-    if (context.mounted) {
+    final otp = await auth.forgotPassword(email);
+    if (otp != null && context.mounted) {
+      form.initOtpFlow(contact: email, flow: 'reset');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('OTP sent successfully: $otp'),
+          duration: const Duration(seconds: 8),
+          backgroundColor: AppColors.authPurple,
+        ),
+      );
       context.pushNamed('verifyOtp', queryParameters: {
         'phone': email,
         'flow': 'reset',

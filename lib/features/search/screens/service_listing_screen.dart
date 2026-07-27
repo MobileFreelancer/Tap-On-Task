@@ -99,7 +99,7 @@ class _ServiceListingScreenState extends State<ServiceListingScreen> {
                             itemBuilder: (_, i) {
                               return _ServiceGridItem(
                                 service: _services[i],
-                                onTap: () => context.pushNamed('serviceDetail', pathParameters: {'serviceId': _services[i].id}),
+                                onTap: () => context.pushNamed('locationSelect'),
                               );
                             },
                           ),
