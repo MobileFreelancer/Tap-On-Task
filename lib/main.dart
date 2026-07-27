@@ -11,6 +11,8 @@ import 'core/services/app_services.dart';
 import 'core/theme/app_theme.dart';
 import 'core/router/app_router.dart';
 import 'features/auth/providers/auth_form_provider.dart';
+import 'features/customer/providers/post_task_provider.dart';
+import 'features/location/providers/location_provider.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -37,6 +39,8 @@ Future<void> main() async {
         ChangeNotifierProvider(create: (_) => BookingService()),
         ChangeNotifierProvider(create: (_) => PaymentService()),
         ChangeNotifierProvider(create: (_) => NotificationService()),
+        ChangeNotifierProvider(create: (_) => PostTaskProvider()),
+        ChangeNotifierProvider(create: (_) => LocationProvider()),
       ],
       child: TapOnTaskApp(firebaseReady: firebaseReady),
     ),

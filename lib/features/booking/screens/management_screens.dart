@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/models/booking_model.dart';
+import '../../../core/models/task_model.dart';
 import '../../../core/services/app_services.dart';
 import '../../../core/utils/formatters.dart';
+import '../../../core/widgets/app_gradient_header.dart';
 import '../../../core/widgets/empty_state.dart';
 import '../../../core/widgets/image_placeholder.dart';
 import '../../../core/widgets/loading_button.dart';
@@ -29,78 +32,242 @@ class _QuotesScreenState extends State<QuotesScreen> {
   @override
   Widget build(BuildContext context) {
     final bookingService = context.watch<BookingService>();
+    final textTheme = Theme.of(context).textTheme;
 
     return Scaffold(
-      backgroundColor: AppColors.backgroundOffWhite,
-      appBar: AppBar(title: const Text('Quotes Received')),
-      body: bookingService.isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : bookingService.quotes.isEmpty
-              ? const EmptyState(
-                  icon: Icons.request_quote_rounded,
-                  title: 'No quotes yet',
-                  subtitle: 'Providers will send quotes for your task soon.',
-                )
-              : ListView.builder(
-                  padding: const EdgeInsets.all(20),
-                  itemCount: bookingService.quotes.length,
-                  itemBuilder: (_, i) {
-                    final quote = bookingService.quotes[i];
-                    return Container(
-                      margin: const EdgeInsets.only(bottom: 12),
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: AppColors.backgroundWhite,
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: AppColors.borderLight),
+      backgroundColor: AppColors.backgroundWhite,
+      body: CustomScrollView(
+        slivers: [
+          SliverToBoxAdapter(
+            child: AppGradientHeader(
+              height: 120.h,
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(20.w, 40.h, 20.w, 0),
+                child: Row(
+                  children: [
+                    GestureDetector(
+                      onTap: () => context.pop(),
+                      child: Icon(Icons.arrow_back_rounded, color: Colors.white, size: 24.sp),
+                    ),
+                    SizedBox(width: 16.w),
+                    Text(
+                      'Quotes (${bookingService.quotes.length})',
+                      style: textTheme.headlineSmall?.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 22.sp,
                       ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              AvatarPlaceholder(radius: 22, name: quote.traderName),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(quote.traderName ?? 'Provider', style: const TextStyle(fontWeight: FontWeight.w600)),
-                                    Text(quote.createdAt.timeAgo, style: const TextStyle(fontSize: 12, color: AppColors.textGray400)),
-                                  ],
-                                ),
-                              ),
-                              Text(
-                                Formatters.formatCurrency(quote.amount),
-                                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.primaryPurple),
-                              ),
-                            ],
-                          ),
-                          if (quote.message != null) ...[
-                            const SizedBox(height: 12),
-                            Text(quote.message!, style: const TextStyle(fontSize: 13, color: AppColors.textGray600)),
-                          ],
-                          const SizedBox(height: 12),
-                          SizedBox(
-                            width: double.infinity,
-                            child: ElevatedButton(
-                              onPressed: () async {
-                                final success = await bookingService.acceptQuote(widget.taskId, quote.id);
-                                if (success && context.mounted) {
-                                  context.pushNamed('payment', queryParameters: {
-                                    'amount': quote.amount.toString(),
-                                    'bookingId': widget.taskId,
-                                  });
-                                }
-                              },
-                              child: const Text('Accept Quote'),
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
+                    ),
+                  ],
                 ),
+              ),
+            ),
+          ),
+          SliverToBoxAdapter(
+            child: Transform.translate(
+              offset: Offset(0, -20.h),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: AppColors.backgroundWhite,
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(30.r)),
+                ),
+                padding: EdgeInsets.fromLTRB(20.w, 24.h, 20.w, 24.h),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildTaskSummaryCard(textTheme),
+                    SizedBox(height: 24.h),
+                    bookingService.isLoading
+                        ? const Center(child: CircularProgressIndicator())
+                        : bookingService.quotes.isEmpty
+                            ? const EmptyState(
+                                icon: Icons.request_quote_rounded,
+                                title: 'No quotes yet',
+                                subtitle: 'Providers will send quotes for your task soon.',
+                              )
+                            : ListView.separated(
+                                shrinkWrap: true,
+                                physics: const NeverScrollableScrollPhysics(),
+                                itemCount: bookingService.quotes.length,
+                                separatorBuilder: (_, __) => SizedBox(height: 16.h),
+                                itemBuilder: (_, i) {
+                                  final quote = bookingService.quotes[i];
+                                  return _buildQuoteCard(quote, textTheme, bookingService);
+                                },
+                              ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTaskSummaryCard(TextTheme textTheme) {
+    return Container(
+      padding: EdgeInsets.all(16.w),
+      decoration: BoxDecoration(
+        color: AppColors.backgroundGray,
+        borderRadius: BorderRadius.circular(16.r),
+        border: Border.all(color: AppColors.borderLight),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: EdgeInsets.all(10.w),
+            decoration: BoxDecoration(
+              color: AppColors.primarySurface,
+              borderRadius: BorderRadius.circular(12.r),
+            ),
+            child: Icon(Icons.plumbing_rounded, color: AppColors.authPurple, size: 24.sp),
+          ),
+          SizedBox(width: 16.w),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Your Task',
+                  style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
+                ),
+                Text(
+                  '123 Maple Street, Toronto, ON, Canada',
+                  style: textTheme.bodySmall?.copyWith(color: AppColors.textGray500),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+          Text(
+            'View details',
+            style: textTheme.labelSmall?.copyWith(
+              color: AppColors.authPurple,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildQuoteCard(TaskBidModel quote, TextTheme textTheme, BookingService bookingService) {
+    return Container(
+      padding: EdgeInsets.all(16.w),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16.r),
+        border: Border.all(color: AppColors.borderLight),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.02),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              CircleAvatar(
+                radius: 30.r,
+                backgroundImage: const NetworkImage('https://via.placeholder.com/60'),
+              ),
+              SizedBox(width: 12.w),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          quote.traderName ?? 'Mike Wilson',
+                          style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+                        ),
+                        Text(
+                          Formatters.formatCurrency(quote.amount),
+                          style: textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.authPurple,
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 4.h),
+                    Row(
+                      children: [
+                        Icon(Icons.star_rounded, color: AppColors.warning, size: 14.sp),
+                        Text(' 4.8', style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w600)),
+                        Text(' (25 jobs completed)', style: TextStyle(fontSize: 12.sp, color: AppColors.textGray500)),
+                      ],
+                    ),
+                    SizedBox(height: 4.h),
+                    Text(
+                      '10 years experience',
+                      style: TextStyle(fontSize: 12.sp, color: AppColors.textGray600),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 12.h),
+          Container(
+            padding: EdgeInsets.all(10.w),
+            decoration: BoxDecoration(
+              color: AppColors.backgroundGray,
+              borderRadius: BorderRadius.circular(8.r),
+            ),
+            child: Text(
+              quote.message ?? 'I can fix it tomorrow morning',
+              style: textTheme.bodySmall?.copyWith(color: AppColors.textGray700),
+            ),
+          ),
+          SizedBox(height: 16.h),
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: () {},
+                  style: OutlinedButton.styleFrom(
+                    padding: EdgeInsets.symmetric(vertical: 12.h),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.r)),
+                  ),
+                  child: const Text('View Profile'),
+                ),
+              ),
+              SizedBox(width: 12.w),
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: () async {
+                    final success = await bookingService.acceptQuote(widget.taskId, quote.id);
+                    if (success && mounted) {
+                      context.pushNamed('payment', queryParameters: {
+                        'amount': quote.amount.toString(),
+                        'bookingId': widget.taskId,
+                      });
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.authPurple,
+                    foregroundColor: Colors.white,
+                    padding: EdgeInsets.symmetric(vertical: 12.h),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.r)),
+                    elevation: 0,
+                  ),
+                  child: const Text('Accept Quote'),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }

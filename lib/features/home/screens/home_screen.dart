@@ -108,7 +108,11 @@ class _HomeScreenState extends State<HomeScreen> {
                               SizedBox(height: 14.h),
                               _buildPromoBanner(textTheme),
                               SizedBox(height: 24.h),
-                              _buildSectionHeader('Popular Category', textTheme, onViewAll: () => context.goNamed('categories')),
+                              _buildSectionHeader('Recent Searches', textTheme),
+                              SizedBox(height: 12.h),
+                              _buildRecentSearches(textTheme),
+                              SizedBox(height: 24.h),
+                              _buildSectionHeader('Popular Category', textTheme, onViewAll: () => context.pushNamed('categories')),
                               SizedBox(height: 12.h),
                               _buildPopularCategories(homeService, textTheme),
                               SizedBox(height: 24.h),
@@ -116,16 +120,16 @@ class _HomeScreenState extends State<HomeScreen> {
                               SizedBox(height: 12.h),
                               _buildNearbyProfessionals(homeService, textTheme),
                               SizedBox(height: 24.h),
-                              _buildSectionHeader('Quick Services', textTheme, onViewAll: () => context.goNamed('categories')),
+                              _buildSectionHeader('Quick Services', textTheme, onViewAll: () => context.pushNamed('categories')),
                               SizedBox(height: 12.h),
                               _buildQuickServices(homeService, textTheme),
                               SizedBox(height: 24.h),
-                              _buildSectionHeader('Active job', textTheme, onViewAll: () => context.goNamed('myTasks')),
+                              _buildSectionHeader('Active job', textTheme, onViewAll: () => context.pushNamed('myTasks')),
                               SizedBox(height: 12.h),
                               if (homeService.recentBookings.isNotEmpty)
                                 _buildJobCard(homeService.recentBookings.first, textTheme, isActive: true),
                               SizedBox(height: 24.h),
-                              _buildSectionHeader('Upcoming Job', textTheme, onViewAll: () => context.goNamed('myTasks')),
+                              _buildSectionHeader('Upcoming Job', textTheme, onViewAll: () => context.pushNamed('myTasks')),
                               SizedBox(height: 12.h),
                               ...homeService.recentBookings.skip(1).take(3).map(
                                     (b) => Padding(
@@ -136,7 +140,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               if (homeService.recentBookings.length > 3)
                                 Center(
                                   child: TextButton(
-                                    onPressed: () => context.goNamed('myTasks'),
+                                    onPressed: () => context.pushNamed('myTasks'),
                                     child: Text(
                                       'See More',
                                       style: textTheme.labelLarge?.copyWith(
@@ -156,12 +160,17 @@ class _HomeScreenState extends State<HomeScreen> {
                 ],
               ),
             ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => context.pushNamed('postTask'),
+        backgroundColor: AppColors.authPurple,
+        child: const Icon(Icons.add_rounded, color: Colors.white, size: 30),
+      ),
     );
   }
 
   Widget _buildSearchBar(TextTheme textTheme) {
     return GestureDetector(
-      onTap: () => context.goNamed('search'),
+      onTap: () => context.pushNamed('search'),
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 4.h),
         decoration: BoxDecoration(
@@ -249,6 +258,38 @@ class _HomeScreenState extends State<HomeScreen> {
           Icon(Icons.engineering_rounded, color: Colors.white.withValues(alpha: 0.6), size: 64.sp),
         ],
       ),
+    );
+  }
+
+  Widget _buildRecentSearches(TextTheme textTheme) {
+    final recentSearches = ['Plumbing', 'Electrician', 'Cleaning', 'HVAC'];
+    return Wrap(
+      spacing: 8.w,
+      runSpacing: 8.h,
+      children: recentSearches.map((search) {
+        return Container(
+          padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+          decoration: BoxDecoration(
+            color: AppColors.primarySurface,
+            borderRadius: BorderRadius.circular(20.r),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.history_rounded, size: 14.sp, color: AppColors.authPurple),
+              SizedBox(width: 4.w),
+              Text(
+                search,
+                style: textTheme.bodySmall?.copyWith(
+                  color: AppColors.authPurple,
+                  fontSize: 12.sp,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+        );
+      }).toList(),
     );
   }
 

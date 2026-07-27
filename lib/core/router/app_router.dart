@@ -19,7 +19,9 @@ import '../../features/booking/screens/service_detail_screen.dart';
 import '../../features/booking/screens/booking_flow_screens.dart';
 import '../../features/booking/screens/management_screens.dart';
 import '../../features/customer/screens/my_tasks_screen.dart';
+import '../../features/customer/screens/matching_traders_screen.dart';
 import '../../features/customer/screens/post_task_screen.dart';
+import '../../features/location/screens/select_location_screen.dart';
 import '../../features/trader/screens/trader_dashboard.dart';
 import '../../features/trader/screens/available_tasks_screen.dart';
 import '../../features/trader/screens/my_bids_screen.dart';
@@ -120,12 +122,12 @@ class AppRouter {
       GoRoute(
         path: '/location-select',
         name: 'locationSelect',
-        builder: (_, state) => LocationSelectScreen(
-          serviceId: state.uri.queryParameters['serviceId'],
-          providerId: state.uri.queryParameters['providerId'],
-          title: state.uri.queryParameters['title'] ?? '',
-          price: state.uri.queryParameters['price'] ?? '0',
-        ),
+        builder: (_, state) => const SelectLocationScreen(),
+      ),
+      GoRoute(
+        path: '/matching-traders/:taskId',
+        name: 'matchingTraders',
+        builder: (_, state) => MatchingTradersScreen(taskId: state.pathParameters['taskId']!),
       ),
       GoRoute(
         path: '/booking-details',
