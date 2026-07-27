@@ -7,6 +7,7 @@ import 'package:tapontask/core/theme/text_styles.dart';
 
 import '../../../core/widgets/app_header.dart';
 import '../../../generated/assets.dart';
+import 'package:go_router/go_router.dart';
 
 class JobConfirmationScreen extends StatefulWidget {
   const JobConfirmationScreen({super.key});
@@ -237,9 +238,12 @@ class _JobConfirmationScreenState extends State<JobConfirmationScreen> {
                   ),
                   Expanded(
                     flex: 0,
-                    child: Image.asset(
-                      AppAssets.forwordimage,
-                      scale: 2.3,
+                    child: GestureDetector(
+                      onTap: () => context.go('/trader/detail'),
+                      child: Image.asset(
+                        AppAssets.forwordimage,
+                        scale: 2.3,
+                      ),
                     ),
                   )
                 ],

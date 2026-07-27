@@ -26,6 +26,7 @@ import '../../features/location/screens/select_location_screen.dart';
 import '../../features/trader/screens/trader_dashboard.dart';
 import '../../features/trader/screens/available_tasks_screen.dart';
 import '../../features/trader/screens/my_bids_screen.dart';
+import '../../features/trader/screens/trader_detail_screen.dart';
 import '../../features/task/screens/task_detail_screen.dart';
 import '../../features/profile/screens/profile_screen.dart';
 import '../../features/profile/screens/edit_profile_screen.dart';
@@ -145,7 +146,8 @@ class AppRouter {
           providerId: state.uri.queryParameters['providerId'],
         ),
       ),
-      GoRoute(path: '/job-confirmation', name: 'jobConfirmation', builder: (_, __) => const JobConfirmationScreen()),
+       GoRoute(path: '/job-confirmation', name: 'jobConfirmation', builder: (_, __) => const JobConfirmationScreen()),
+       GoRoute(path: '/trader/detail', name: 'traderDetail', builder: (_, __) => const TraderDetailScreen()),
       GoRoute(path: '/booking-success', name: 'bookingSuccess', builder: (_, _) => const BookingSuccessScreen()),
       GoRoute(
         path: '/quotes/:taskId',
