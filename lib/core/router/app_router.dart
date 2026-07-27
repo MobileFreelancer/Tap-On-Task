@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../features/trader/screens/job_confirmation_screen.dart';
 import '../services/auth_service.dart';
 import '../widgets/app_bottom_nav.dart';
 import '../../features/auth/screens/splash_screen.dart';
@@ -144,6 +145,7 @@ class AppRouter {
           providerId: state.uri.queryParameters['providerId'],
         ),
       ),
+      GoRoute(path: '/job-confirmation', name: 'jobConfirmation', builder: (_, __) => const JobConfirmationScreen()),
       GoRoute(path: '/booking-success', name: 'bookingSuccess', builder: (_, _) => const BookingSuccessScreen()),
       GoRoute(
         path: '/quotes/:taskId',
