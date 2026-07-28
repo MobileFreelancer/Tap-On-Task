@@ -116,7 +116,7 @@ class AuthFormProvider extends ChangeNotifier {
     }
     if (phoneController.text.trim().length < 10) return 'Enter a valid phone number';
     if (passwordController.text.length < 6) return 'Password must be at least 6 characters';
-    if (passwordController.text != confirmPasswordController.text) return 'Passwords do not match';
+    //if (passwordController.text != confirmPasswordController.text) return 'Passwords do not match';
     if (!_termsAccepted) return 'Please accept the terms and conditions';
     return null;
   }

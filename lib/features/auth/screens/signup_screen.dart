@@ -176,6 +176,8 @@ class SignupScreen extends StatelessWidget {
 
     final error = form.validateSignup();
     if (error != null) {
+      print("++++++++");
+      print(error);
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error)));
       return;
     }

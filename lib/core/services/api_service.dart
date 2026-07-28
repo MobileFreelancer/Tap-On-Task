@@ -3,6 +3,7 @@ import 'dart:developer' as developer;
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../config/api_config.dart';
+import '../models/api_category_model.dart';
 
 class ApiException implements Exception {
   final String message;
@@ -179,6 +180,7 @@ class ApiService {
       if (isFormData && data is Map<String, dynamic>) {
         payload = FormData.fromMap(data);
       }
+
       return await _dio.post(_ensureApiPath(path), data: payload);
     } on DioException catch (e) {
       throw _handleDioError(e);
@@ -207,6 +209,7 @@ class ApiService {
       'password': password,
       'password_confirmation': password,
     }, isFormData: true);
+    print(response.data);
     return response.data as Map<String, dynamic>;
   }
 
@@ -237,6 +240,13 @@ class ApiService {
     return response.data as Map<String, dynamic>;
   }
 
+  // ----- Category Endpoints -----
+  Future<List<ApiCategory>> getCategories() async {
+    final response = await get('/categories');
+    final model = CategoryResponseModel.fromJson(response.data);
+    return model.data.categories;
+  }
+
   // ----- Task Endpoints -----
   Future<List<dynamic>> getTasks({String? category, String? status}) async {
     final params = <String, dynamic>{};
@@ -253,6 +263,25 @@ class ApiService {
 
   Future<Map<String, dynamic>> createTask(Map<String, dynamic> taskData) async {
     final response = await post('/tasks', data: taskData);
+    return response.data as Map<String, dynamic>;
+  }
+
+  Future<Map<String, dynamic>> addJob(Map<String, dynamic> jobData) async {
+    final formData = FormData.fromMap(jobData);
+    
+    // Handle photos array if present
+    if (jobData.containsKey('photos')) {
+      final List<String> photos = List<String>.from(jobData['photos']);
+      for (var path in photos) {
+        formData.files.add(MapEntry(
+          'photos[]',
+          await MultipartFile.fromFile(path, filename: path.split('/').last),
+        ));
+      }
+      formData.fields.removeWhere((field) => field.key == 'photos');
+    }
+
+    final response = await post('/add-job', data: formData);
     return response.data as Map<String, dynamic>;
   }
 

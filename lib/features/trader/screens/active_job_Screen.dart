@@ -544,9 +544,7 @@ class ActiveJobScreen extends StatelessWidget {
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
               padding: const EdgeInsets.symmetric(vertical: 12),
             ),
-            onPressed: () {
-
-            },
+            onPressed: () => context.pushNamed('help'),
             child:   Text('Need Help?', style: TextStylesInApp.robotoBody(fontSize: 16.sp,color: AppColors.backgroundWhite, fontWeight: FontWeight.w400)),
           ),
         ),

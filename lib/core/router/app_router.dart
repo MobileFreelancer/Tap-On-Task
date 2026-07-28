@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../features/profile/screens/help_support_screen.dart';
 import '../../features/trader/screens/job_confirmation_screen.dart';
 import '../../features/trader/screens/active_job_Screen.dart';
 import '../services/auth_service.dart';
@@ -82,9 +83,9 @@ class AppRouter {
           GoRoute(path: '/customer/dashboard', name: 'customerDashboard', builder: (_, _) => const HomeScreen()),
           GoRoute(path: '/customer/post-task', name: 'postTask', builder: (_, _) => const PostTaskScreen()),
           GoRoute(path: '/categories', name: 'categories', builder: (_, _) => const CategoriesScreen()),
-          GoRoute(path: '/help', name: 'help', builder: (_, _) => const HelpSupportScreen()),
+          GoRoute(path: '/help', name: 'help', builder: (_, _) =>   HelpSupportScreen()),
           GoRoute(path: '/profile', name: 'profile', builder: (_, _) => const ProfileScreen()),
-          
+
           // Flow Screens (keep bottom bar)
           GoRoute(
             path: '/service-listing',
@@ -114,7 +115,6 @@ class AppRouter {
           GoRoute(path: '/customer/my-tasks', name: 'myTasks', builder: (_, _) => const MyTasksScreen()),
           GoRoute(path: '/customer/messages', name: 'messages', builder: (_, _) => const MessagesScreen()),
           GoRoute(path: '/wallet', name: 'wallet', builder: (_, _) => const WalletScreen()),
-          GoRoute(path: '/notifications', name: 'notifications', builder: (_, _) => const NotificationsScreen()),
         ],
       ),
 
@@ -178,7 +178,7 @@ class AppRouter {
         name: 'addCard',
         builder: (_, _) => const AddCardScreen(),
       ),
-      GoRoute(path: '/wallet', name: 'wallet', builder: (_, _) => const WalletScreen()),
+      //GoRoute(path: '/wallet', name: 'wallet', builder: (_, _) => const WalletScreen()),
       GoRoute(path: '/notifications', name: 'notifications', builder: (_, _) => const NotificationsScreen()),
       GoRoute(
         path: '/task/:taskId',
