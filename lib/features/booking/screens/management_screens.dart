@@ -8,11 +8,14 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/models/task_model.dart';
 import '../../../core/models/booking_model.dart';
 import '../../../core/services/app_services.dart';
+import '../../../core/theme/text_styles.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/widgets/app_gradient_header.dart';
+import '../../../core/widgets/app_header.dart';
 import '../../../core/widgets/empty_state.dart';
 import '../../../core/widgets/image_placeholder.dart';
 import '../../../core/widgets/loading_button.dart';
+import '../../../generated/assets.dart';
 import '../../customer/providers/post_task_provider.dart';
 
 class QuotesScreen extends StatefulWidget {
