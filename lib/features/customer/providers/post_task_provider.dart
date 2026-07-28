@@ -117,7 +117,7 @@ class PostTaskProvider extends ChangeNotifier {
         'longitude': 79.3832,
         'budget_type': 'fixed',
         'budget_amount': _estimatedBudget,
-        'status': 'draft',
+        'status': 'published',
         'photos': _selectedPhotos,
       };
 

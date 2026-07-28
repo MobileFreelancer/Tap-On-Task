@@ -4,6 +4,7 @@ import '../models/service_model.dart';
 import '../models/booking_model.dart';
 import '../models/notification_model.dart';
 import '../models/task_model.dart';
+import '../models/api_job_model.dart';
 import 'api_service.dart';
 import 'app_mock_data.dart';
 
@@ -19,6 +20,7 @@ class HomeService extends ChangeNotifier {
   List<ServiceModel> _popularServices = [];
   List<ProviderModel> _nearbyProviders = [];
   List<BookingModel> _recentBookings = [];
+  List<ApiJobModel> _apiJobs = [];
   bool _isLoading = false;
   String? _error;
 
@@ -27,6 +29,7 @@ class HomeService extends ChangeNotifier {
   List<ServiceModel> get popularServices => _popularServices;
   List<ProviderModel> get nearbyProviders => _nearbyProviders;
   List<BookingModel> get recentBookings => _recentBookings;
+  List<ApiJobModel> get apiJobs => _apiJobs;
   bool get isLoading => _isLoading;
   String? get error => _error;
 
@@ -36,15 +39,18 @@ class HomeService extends ChangeNotifier {
     notifyListeners();
 
     try {
-      // Force mock for home data as API is not ready
+      // Fetch dynamic jobs from API
+      _apiJobs = await _api.getJobList(filter: 'active');
+
+      // Mock data for other sections as API is not ready
       await Future.delayed(const Duration(milliseconds: 600));
       _banners = AppMockData.banners;
       _categories = AppMockData.categories;
       _popularServices = AppMockData.services;
       _nearbyProviders = AppMockData.providers;
       _recentBookings = AppMockData.bookings;
-    } catch (_) {
-      _error = 'Failed to load home data.';
+    } catch (e) {
+      _error = 'Failed to load home data: $e';
     }
 
     _isLoading = false;

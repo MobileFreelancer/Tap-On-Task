@@ -3,8 +3,10 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/models/booking_model.dart';
+import '../../../core/models/api_job_model.dart';
 import '../../../core/services/app_services.dart';
 import '../../../core/services/auth_service.dart';
 import '../../../core/widgets/app_gradient_header.dart';
@@ -31,7 +33,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final homeService = context.watch<HomeService>();
     final auth = context.watch<AuthService>();
     final textTheme = Theme.of(context).textTheme;
-    final userName = auth.currentUser?.name?.split(' ').first ?? 'John';
+    final userName = auth.currentUser?.name?.split(' ').first ?? 'User';
 
     return Scaffold(
       backgroundColor: AppColors.backgroundWhite,
@@ -67,7 +69,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                       Text(
                                         'How can we help you today?',
                                         style: textTheme.bodyMedium?.copyWith(
-                                          color: Colors.white.withValues(alpha: 0.85),
+                                          color: Colors.white.withOpacity(0.85),
                                           fontSize: 14.sp,
                                         ),
                                       ),
@@ -131,13 +133,24 @@ class _HomeScreenState extends State<HomeScreen> {
                               SizedBox(height: 24.h),
                               _buildSectionHeader('Upcoming Job', textTheme, onViewAll: () => context.pushNamed('myTasks')),
                               SizedBox(height: 12.h),
-                              ...homeService.recentBookings.skip(1).take(3).map(
-                                    (b) => Padding(
-                                      padding: EdgeInsets.only(bottom: 10.h),
-                                      child: _buildJobCard(b, textTheme),
+                              if (homeService.apiJobs.isEmpty)
+                                Center(
+                                  child: Padding(
+                                    padding: EdgeInsets.symmetric(vertical: 20.h),
+                                    child: Text(
+                                      'No upcoming jobs found',
+                                      style: textTheme.bodyMedium?.copyWith(color: AppColors.textGray400),
                                     ),
                                   ),
-                              if (homeService.recentBookings.length > 3)
+                                )
+                              else
+                                ...homeService.apiJobs.take(3).map(
+                                      (job) => Padding(
+                                        padding: EdgeInsets.only(bottom: 10.h),
+                                        child: _buildApiJobCard(job, textTheme),
+                                      ),
+                                    ),
+                              if (homeService.apiJobs.length > 3)
                                 Center(
                                   child: TextButton(
                                     onPressed: () => context.pushNamed('myTasks'),
@@ -227,7 +240,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 Container(
                   padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.2),
+                    color: Colors.white.withOpacity(0.2),
                     borderRadius: BorderRadius.circular(6.r),
                   ),
                   child: Text(
@@ -252,14 +265,14 @@ class _HomeScreenState extends State<HomeScreen> {
                 Text(
                   'Trusted professionals at your service',
                   style: textTheme.bodySmall?.copyWith(
-                    color: Colors.white.withValues(alpha: 0.8),
+                    color: Colors.white.withOpacity(0.8),
                     fontSize: 12.sp,
                   ),
                 ),
               ],
             ),
           ),
-          Icon(Icons.engineering_rounded, color: Colors.white.withValues(alpha: 0.6), size: 64.sp),
+          Icon(Icons.engineering_rounded, color: Colors.white.withOpacity(0.6), size: 64.sp),
         ],
       ),
     );
@@ -439,7 +452,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
                           minimumSize: Size.zero,
                           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadiusGeometry.all(Radius.circular(5.w)))
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(5.w)))
                         ),
                         child: Text(
                           'View Profile',
@@ -459,7 +472,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
                       minimumSize: Size.zero,
                       tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      shape: RoundedRectangleBorder(side: BorderSide(color: AppColors.textGrayF9),borderRadius: BorderRadiusGeometry.all(Radius.circular(5.w)))
+                      shape: RoundedRectangleBorder(side: BorderSide(color: AppColors.textGrayF9),borderRadius: BorderRadius.all(Radius.circular(5.w)))
                   ),
                   child: Row(
                     children: [
@@ -628,6 +641,106 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
             ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildApiJobCard(ApiJobModel job, TextTheme textTheme) {
+    final dateStr = job.preferredDate != null 
+        ? DateFormat('MMM dd, yyyy').format(job.preferredDate!) 
+        : 'Any date';
+
+    return Container(
+      padding: EdgeInsets.all(12.w),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14.r),
+        border: Border.all(color: AppColors.borderLight),
+        boxShadow: [
+          BoxShadow(color: AppColors.shadowLight, blurRadius: 4, offset: const Offset(0, 2)),
+        ],
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(10.r),
+            child: job.photos.isNotEmpty
+                ? CachedNetworkImage(
+                    imageUrl: job.photos.first.photoPath,
+                    width: 70.w,
+                    height: 70.w,
+                    fit: BoxFit.cover,
+                    placeholder: (context, url) => Container(color: Colors.grey[200]),
+                    errorWidget: (context, url, error) => Container(
+                      color: Colors.grey[200],
+                      child: const Icon(Icons.image_not_supported_outlined),
+                    ),
+                  )
+                : Container(
+                    width: 70.w,
+                    height: 70.w,
+                    color: AppColors.primarySurface,
+                    child: Icon(Icons.work_outline_rounded, color: AppColors.authPurple, size: 30.sp),
+                  ),
+          ),
+          SizedBox(width: 12.w),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '${job.category?.name ?? 'Category'} > ${job.subcategory?.name ?? 'Subcategory'}',
+                  style: textTheme.labelSmall?.copyWith(color: AppColors.authPurple, fontWeight: FontWeight.w600),
+                ),
+                SizedBox(height: 4.h),
+                Text(
+                  job.description,
+                  style: textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600, fontSize: 13.sp),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                SizedBox(height: 6.h),
+                Row(
+                  children: [
+                    Icon(Icons.calendar_today_outlined, size: 12.sp, color: AppColors.textGray500),
+                    SizedBox(width: 4.w),
+                    Text(
+                      '$dateStr | ${job.preferredTimeStart} - ${job.preferredTimeEnd}',
+                      style: textTheme.labelSmall?.copyWith(color: AppColors.textGray500, fontSize: 10.sp),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 4.h),
+                Row(
+                  children: [
+                    Icon(Icons.location_on_outlined, size: 12.sp, color: AppColors.textGray500),
+                    SizedBox(width: 4.w),
+                    Expanded(
+                      child: Text(
+                        job.address,
+                        style: textTheme.labelSmall?.copyWith(color: AppColors.textGray500, fontSize: 10.sp),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
+            decoration: BoxDecoration(
+              color: Colors.blue.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(4.r),
+            ),
+            child: Text(
+              job.status.toUpperCase(),
+              style: TextStyle(color: Colors.blue, fontSize: 8.sp, fontWeight: FontWeight.bold),
+            ),
           ),
         ],
       ),

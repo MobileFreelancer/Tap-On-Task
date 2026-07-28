@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../config/api_config.dart';
 import '../models/api_category_model.dart';
+import '../models/api_job_model.dart';
 
 class ApiException implements Exception {
   final String message;
@@ -67,6 +68,7 @@ class ApiService {
               for (final file in formData.files) {
                 curl.write(" -F '${file.key}=@${file.value.filename}'");
               }
+
             } else {
               curl.write(" -d '${options.data}'");
             }
@@ -247,7 +249,13 @@ class ApiService {
     return model.data.categories;
   }
 
-  // ----- Task Endpoints -----
+  // ----- Task/Job Endpoints -----
+  Future<List<ApiJobModel>> getJobList({String filter = 'active'}) async {
+    final response = await get('/get-job-list', queryParams: {'filter': filter});
+    final model = JobListResponseModel.fromJson(response.data);
+    return model.data.jobs;
+  }
+
   Future<List<dynamic>> getTasks({String? category, String? status}) async {
     final params = <String, dynamic>{};
     if (category != null) params['category'] = category;
