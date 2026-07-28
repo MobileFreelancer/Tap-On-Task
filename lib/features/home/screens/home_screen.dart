@@ -236,12 +236,16 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
                 SizedBox(height: 6.h),
-                Text(
-                  'with Home Services?',
-                  style: textTheme.titleMedium?.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 16.sp,
+                GestureDetector(
+                  onTap: () => context.pushNamed('jobConfirmation'),
+                  child: Text(
+                    'with Home Services?',
+                    style: textTheme.titleMedium?.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 16.sp,
+                      decoration: TextDecoration.underline,
+                    ),
                   ),
                 ),
                 SizedBox(height: 4.h),

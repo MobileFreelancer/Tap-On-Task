@@ -33,7 +33,7 @@ class AppColors {
 
   static const Color textPrimary = Color(0xFF111827);
   static const Color textSecondary = Color(0xFF6B7280);
-  static const Color textGray400 = Color(0xFF64666C);
+    static const Color textGray400 = Color(0xFF64666C);
   static const Color textGrayF9 = Color(0xFFF7F6F9);
   static const Color textGray500 = Color(0xFF64666C);
   static const Color textGray600 = Color(0xFF4B5563);
@@ -62,4 +62,5 @@ class AppColors {
 
   static const Color shimmerBase = Color(0xFFE5E7EB);
   static const Color shimmerHighlight = Color(0xFFF3F4F6);
+
 }

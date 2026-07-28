@@ -1,3 +1,4 @@
+
 class AppAssets {
   AppAssets._();
 
@@ -26,6 +27,13 @@ class AppAssets {
   static const String onboardingTrader = '$_imagePath/onboarding_trader.png';
   static const String emptyState = '$_imagePath/empty_state.png';
   static const String errorState = '$_imagePath/error_state.png';
+  static const String dummyTrader = '$_imagePath/dummytrader.png';
+  static const String toolIcon = '$_imagePath/tool.png';
+  static const String forwordimage = '$_imagePath/forwordimage.png';
+  static const String appHeader = '$_imagePath/app_header.png';
+  static const String call = '$_imagePath/call.png';
+  static const String chat = '$_imagePath/chat.png';
+  static const String promocode = '$_imagePath/promocode.png';
 
   static const String iconHome = '$_iconPath/home.svg';
   static const String iconTasks = '$_iconPath/tasks.svg';
@@ -37,4 +45,6 @@ class AppAssets {
   static const String iconStar = '$_iconPath/star.svg';
   static const String iconCategory = '$_iconPath/category.svg';
   static const String iconWallet = '$_iconPath/wallet.svg';
+
 }
+
