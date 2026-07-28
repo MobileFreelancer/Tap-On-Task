@@ -2,19 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-import 'package:intl/intl.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/constants/app_colors.dart';
-import '../../../core/models/task_model.dart';
 import '../../../core/models/booking_model.dart';
+import '../../../core/models/task_model.dart';
 import '../../../core/services/app_services.dart';
-import '../../../core/theme/text_styles.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/widgets/app_gradient_header.dart';
-import '../../../core/widgets/app_header.dart';
 import '../../../core/widgets/empty_state.dart';
 import '../../../core/widgets/image_placeholder.dart';
-import '../../../core/widgets/loading_button.dart';
+import '../../../core/widgets/app_header.dart';
+import '../../../core/theme/text_styles.dart';
 import '../../../generated/assets.dart';
 import '../../customer/providers/post_task_provider.dart';
 
@@ -111,21 +109,21 @@ class _QuotesScreenState extends State<QuotesScreen> {
                     bookingService.isLoading
                         ? const Center(child: CircularProgressIndicator())
                         : bookingService.quotes.isEmpty
-                            ? const EmptyState(
-                                icon: Icons.request_quote_rounded,
-                                title: 'No quotes yet',
-                                subtitle: 'Providers will send quotes for your task soon.',
-                              )
-                            : ListView.separated(
-                                shrinkWrap: true,
-                                physics: const NeverScrollableScrollPhysics(),
-                                itemCount: bookingService.quotes.length,
-                                separatorBuilder: (_, __) => SizedBox(height: 16.h),
-                                itemBuilder: (_, i) {
-                                  final quote = bookingService.quotes[i];
-                                  return _buildQuoteCard(quote, textTheme, bookingService);
-                                },
-                              ),
+                        ? const EmptyState(
+                      icon: Icons.request_quote_rounded,
+                      title: 'No quotes yet',
+                      subtitle: 'Providers will send quotes for your task soon.',
+                    )
+                        : ListView.separated(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: bookingService.quotes.length,
+                      separatorBuilder: (_, __) => SizedBox(height: 16.h),
+                      itemBuilder: (_, i) {
+                        final quote = bookingService.quotes[i];
+                        return _buildQuoteCard(quote, textTheme, bookingService);
+                      },
+                    ),
                   ],
                 ),
               ),
@@ -461,7 +459,7 @@ class TrackingScreen extends StatelessWidget {
                   ),
                   child: Row(
                     children: [
-                      _AvatarPlaceholder(radius: 24, name: booking.providerName),
+                      AvatarPlaceholder(radius: 24, name: booking.providerName),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Column(
@@ -542,25 +540,6 @@ class TrackingScreen extends StatelessWidget {
       default:
         return 0;
     }
-  }
-}
-
-class _AvatarPlaceholder extends StatelessWidget {
-  final double radius;
-  final String? name;
-
-  const _AvatarPlaceholder({required this.radius, this.name});
-
-  @override
-  Widget build(BuildContext context) {
-    return CircleAvatar(
-      radius: radius,
-      backgroundColor: AppColors.primarySurface,
-      child: Text(
-        name != null && name!.isNotEmpty ? name![0].toUpperCase() : '?',
-        style: TextStyle(color: AppColors.authPurple, fontWeight: FontWeight.bold),
-      ),
-    );
   }
 }
 
