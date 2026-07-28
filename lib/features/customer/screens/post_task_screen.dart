@@ -464,7 +464,7 @@ class _PostTaskScreenState extends State<PostTaskScreen> {
   }
 
   Future<void> _handleSubmit(PostTaskProvider provider) async {
-    Navigator.push(context, MaterialPageRoute(builder: (context) => const PostTaskSuccessScreen()));
+    context.pushNamed('postTaskSuccess');
   }
 }
 
@@ -495,9 +495,7 @@ class PostTaskSuccessScreen extends StatelessWidget {
               child: ElevatedButton(
                 onPressed: () {
                 context.read<PostTaskProvider>().reset();
-                // First remove the Success screen
-                Navigator.pop(context);
-                // Then navigate to Matching Traders
+                // Replace the Success screen with Matching Traders (no imperative Navigator calls)
                 context.goNamed('matchingTraders', pathParameters: {'taskId': 'demo_task_id'});
               },
                 style: ElevatedButton.styleFrom(backgroundColor: AppColors.authPurple, foregroundColor: Colors.white, padding: EdgeInsets.symmetric(vertical: 16.h), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)), elevation: 0),

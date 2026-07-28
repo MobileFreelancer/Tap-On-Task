@@ -41,90 +41,50 @@ class _QuotesScreenState extends State<QuotesScreen> {
 
     return Scaffold(
       backgroundColor: AppColors.backgroundWhite,
-      body: CustomScrollView(
-        slivers: [
-          SliverToBoxAdapter(
-            child: AppGradientHeader(
-              height: 160.h,
-              child: Container(
-                padding: EdgeInsets.fromLTRB(20.w, MediaQuery.paddingOf(context).top + 10.h, 20.w, 20.h),
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: GestureDetector(
-                        onTap: () => context.pop(),
-                        child: Container(
-                          width: 40.w,
-                          height: 40.w,
-                          decoration: const BoxDecoration(
-                            color: Colors.white,
-                            shape: BoxShape.circle,
-                          ),
-                          child: Icon(Icons.chevron_left_rounded, color: AppColors.authPurple, size: 24.sp),
-                        ),
-                      ),
-                    ),
-                    Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          'Quotes (${bookingService.quotes.length})',
-                          style: textTheme.headlineSmall?.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w700,
-                            fontSize: 20.sp,
-                          ),
-                        ),
-                        SizedBox(height: 4.h),
-                        Text(
-                          'Compare Quotes and choose the best trader',
-                          style: textTheme.bodyMedium?.copyWith(
-                            color: Colors.white.withOpacity(0.9),
-                            fontSize: 12.sp,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
+      body: Column(
+        children: [
+          AppGradientHeader(
+            height: 180.h,
+            showBack: true,
+            title:  'Quotes (${bookingService.quotes.length})',
+            subTitle:  'Compare Quotes and choose the best trader',
+            onBack: () => context.canPop() ? context.pop() : context.go('/customer/dashboard'),
           ),
-          SliverToBoxAdapter(
+          Expanded(
             child: Transform.translate(
               offset: Offset(0, -30.h),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: AppColors.backgroundWhite,
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(30.r)),
-                ),
-                padding: EdgeInsets.fromLTRB(20.w, 24.h, 20.w, 24.h),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildTaskSummaryCard(textTheme, postTaskProvider),
-                    SizedBox(height: 24.h),
-                    bookingService.isLoading
-                        ? const Center(child: CircularProgressIndicator())
-                        : bookingService.quotes.isEmpty
-                        ? const EmptyState(
-                      icon: Icons.request_quote_rounded,
-                      title: 'No quotes yet',
-                      subtitle: 'Providers will send quotes for your task soon.',
-                    )
-                        : ListView.separated(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: bookingService.quotes.length,
-                      separatorBuilder: (_, __) => SizedBox(height: 16.h),
-                      itemBuilder: (_, i) {
-                        final quote = bookingService.quotes[i];
-                        return _buildQuoteCard(quote, textTheme, bookingService);
-                      },
-                    ),
-                  ],
+              child: SingleChildScrollView(
+                child: Container(
+                  padding: EdgeInsets.fromLTRB(20.w, 24.h, 20.w, 24.h),
+                  decoration: BoxDecoration(
+                    color: AppColors.backgroundWhite,
+                    borderRadius: BorderRadius.vertical(top: Radius.circular(30.r)),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildTaskSummaryCard(textTheme, postTaskProvider),
+                      SizedBox(height: 24.h),
+                      bookingService.isLoading
+                          ? const Center(child: CircularProgressIndicator())
+                          : bookingService.quotes.isEmpty
+                          ? const EmptyState(
+                        icon: Icons.request_quote_rounded,
+                        title: 'No quotes yet',
+                        subtitle: 'Providers will send quotes for your task soon.',
+                      )
+                          : ListView.separated(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: bookingService.quotes.length,
+                        separatorBuilder: (_, __) => SizedBox(height: 16.h),
+                        itemBuilder: (_, i) {
+                          final quote = bookingService.quotes[i];
+                          return _buildQuoteCard(quote, textTheme, bookingService);
+                        },
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),

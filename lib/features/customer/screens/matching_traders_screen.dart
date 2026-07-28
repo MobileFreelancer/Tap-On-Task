@@ -58,7 +58,7 @@ class MatchingTradersScreen extends StatelessWidget {
             showBack: true,
             title:  "Matching Traders" ,
             subTitle:  'We found 12 qualified professionals near you',
-            onBack: () => context.pop(),
+            onBack: () => context.canPop() ? context.pop() : context.go('/customer/dashboard'),
           ),
           Expanded(
             child: Transform.translate(
