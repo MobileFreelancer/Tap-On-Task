@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/widgets/app_gradient_header.dart';
+import '../../auth/widgets/auth_scaffold.dart';
 import '../providers/post_task_provider.dart';
 
 class PostTaskScreen extends StatefulWidget {
@@ -574,6 +575,7 @@ class _PostTaskScreenState extends State<PostTaskScreen> {
   }
 
   Future<void> _handleSubmit(PostTaskProvider provider) async {
+    context.pushNamed('postTaskSuccess');
     if (!provider.isValid) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please complete all required fields.')),
@@ -585,7 +587,7 @@ class _PostTaskScreenState extends State<PostTaskScreen> {
     if (success && mounted) {
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => const PostTaskSuccessScreen()),
+        MaterialPageRoute(builder: (context) =>   PostTaskSuccessScreen()),
       );
     } else if (provider.postError != null && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -602,94 +604,35 @@ class PostTaskSuccessScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
 
-    return Scaffold(
-      backgroundColor: AppColors.backgroundWhite,
-      body: Stack(
-        children: [
-          AppGradientHeader(height: 300.h, child: const SizedBox.shrink()),
-          Positioned(
-            top: 50.h,
-            left: 20.w,
-            child: GestureDetector(
-              onTap: () => Navigator.pop(context),
-              child: Container(
-                padding: EdgeInsets.all(8.w),
-                decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.2), shape: BoxShape.circle),
-                child: Icon(Icons.arrow_back_rounded, color: Colors.white, size: 24.sp),
+    return AuthScaffold(
+      headerTitle: 'Success',
+      showBack: true,
+      showLogo: false,
+      child: Container(
+        width: double.infinity,
+        padding: EdgeInsets.all(32.w),
+        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(24.r), boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 20, offset: const Offset(0, 10))]),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text('Your task is now live.', textAlign: TextAlign.center, style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700, color: AppColors.authNavy)),
+            SizedBox(height: 12.h),
+            Text('Nearby professionals will start sending quotes soon.', textAlign: TextAlign.center, style: textTheme.bodyMedium?.copyWith(color: AppColors.textGray500)),
+            SizedBox(height: 32.h),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () {
+                  context.read<PostTaskProvider>().reset();
+                  // Replace the Success screen with Matching Traders (no imperative Navigator calls)
+                  context.goNamed('matchingTraders', pathParameters: {'taskId': 'demo_task_id'});
+                },
+                style: ElevatedButton.styleFrom(backgroundColor: AppColors.authPurple, foregroundColor: Colors.white, padding: EdgeInsets.symmetric(vertical: 16.h), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)), elevation: 0),
+                child: const Text('View My Task', style: TextStyle(fontWeight: FontWeight.w700)),
               ),
             ),
-          ),
-          Center(
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 24.w),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    'Success',
-                    style: textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w700, color: Colors.white),
-                  ),
-                  SizedBox(height: 40.h),
-                  Container(
-                    width: double.infinity,
-                    padding: EdgeInsets.all(32.w),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(24.r),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
-                          blurRadius: 20,
-                          offset: const Offset(0, 10),
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          'Your task is now live.',
-                          textAlign: TextAlign.center,
-                          style: textTheme.titleLarge?.copyWith(
-                            fontWeight: FontWeight.w700,
-                            color: AppColors.authNavy,
-                          ),
-                        ),
-                        SizedBox(height: 12.h),
-                        Text(
-                          'Nearby professionals will start sending quotes soon.',
-                          textAlign: TextAlign.center,
-                          style: textTheme.bodyMedium?.copyWith(color: AppColors.textGray500),
-                        ),
-                        SizedBox(height: 32.h),
-                        SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton(
-                            onPressed: () {
-                              context.read<PostTaskProvider>().reset();
-                              // First remove the Success screen
-                              Navigator.pop(context);
-                              // Then navigate to Matching Traders
-                              context.goNamed('matchingTraders', pathParameters: {'taskId': 'demo_task_id'});
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: AppColors.authPurple,
-                              foregroundColor: Colors.white,
-                              padding: EdgeInsets.symmetric(vertical: 16.h),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
-                              elevation: 0,
-                            ),
-                            child: const Text('View My Task', style: TextStyle(fontWeight: FontWeight.w700)),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

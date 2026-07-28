@@ -103,31 +103,30 @@ class _SelectLocationScreenState extends State<SelectLocationScreen> {
   }
 
   Widget _buildSearchBar(TextTheme textTheme, LocationProvider locationProvider) {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 4.h),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12.r),
-        border: Border.all(color: AppColors.borderLight),
-      ),
-      child: Row(
-        children: [
-          Icon(Icons.search_rounded, color: AppColors.textGray400, size: 20.sp),
-          SizedBox(width: 12.w),
-          Expanded(
-            child: TextField(
-              controller: _searchController,
-              onChanged: locationProvider.updateSearchQuery,
-              style: textTheme.bodyMedium?.copyWith(fontSize: 14.sp),
-              decoration: InputDecoration(
-                hintText: '123 Maple street, toronto, ON, Canada',
-                hintStyle: textTheme.bodyMedium?.copyWith(color: AppColors.textGray400),
-                border: InputBorder.none,
-              ),
-            ),
-          ),
-          Icon(Icons.close_rounded, color: AppColors.textGray400, size: 20.sp),
-        ],
+    return TextField(
+      controller: _searchController,
+      onChanged: locationProvider.updateSearchQuery,
+      style: textTheme.bodyMedium?.copyWith(fontSize: 14.sp),
+      decoration: InputDecoration(
+        hintText: '123 Maple street, toronto, ON, Canada',
+        hintStyle: textTheme.bodyMedium?.copyWith(color: AppColors.textGray400),
+        prefixIcon: Icon(Icons.search_rounded, color: AppColors.textGray400, size: 20.sp),
+        suffixIcon: Icon(Icons.close_rounded, color: AppColors.textGray400, size: 20.sp),
+        filled: true,
+        fillColor: Colors.white,
+        contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12.r),
+          borderSide: BorderSide(color: AppColors.borderLight),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12.r),
+          borderSide: BorderSide(color: AppColors.borderLight),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12.r),
+          borderSide: BorderSide(color: AppColors.authPurple),
+        ),
       ),
     );
   }

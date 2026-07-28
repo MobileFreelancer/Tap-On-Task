@@ -93,7 +93,7 @@ class _ServiceListingScreenState extends State<ServiceListingScreen> {
                               crossAxisCount: 2,
                               mainAxisSpacing: 16.h,
                               crossAxisSpacing: 16.w,
-                              childAspectRatio: 0.75,
+                              childAspectRatio: 1,
                             ),
                             itemCount: _services.length,
                             itemBuilder: (_, i) {
@@ -130,61 +130,87 @@ class _ServiceGridItem extends StatelessWidget {
       child: Container(
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(16.r),
+          borderRadius: BorderRadius.circular(10.r),
           border: Border.all(color: AppColors.borderLight),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Expanded(
-              child: Container(
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  color: AppColors.primarySurface,
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(16.r)),
-                  image: const DecorationImage(
-                    image: NetworkImage('https://via.placeholder.com/150'),
-                    fit: BoxFit.cover,
+            SizedBox(
+              height: 90.h,
+              child: Padding(
+                padding:  EdgeInsets.all(5.w),
+                child: Container(
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: AppColors.primarySurface,
+                    borderRadius: BorderRadius.circular(10.r),
+                    image: const DecorationImage(
+                      image: NetworkImage('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQXrTgXOmC4FUVGct7i7I8j6dC6tAF6i7_vi2wRKZsrWw&s=10'),
+                      fit: BoxFit.cover,
+                    ),
                   ),
                 ),
               ),
             ),
+            SizedBox(height: 6.h,),
             Padding(
-              padding: EdgeInsets.all(12.w),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              padding: EdgeInsets.symmetric(horizontal:5.w),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Text(
-                    service.title,
-                    style: textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 13.sp,
-                      color: AppColors.authNavy,
+                  Container(
+                      height: 40.w,
+                      width: 40.w,
+                decoration: BoxDecoration(
+                    color: AppColors.primaryPurple,
+                    borderRadius: BorderRadius.circular(10.r),),
+                      child: Icon(Icons.cleaning_services_outlined, color: AppColors.backgroundWhite)),
+                  SizedBox(width: 8.w),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                service.title,
+                                style: textTheme.bodyMedium?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 12.sp,
+                                  color: AppColors.authNavy,
+                                ),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 2.h),
+                        Row(
+                          children: [
+                            Container(
+                              width: 6.w,
+                              height: 6.w,
+                              decoration: const BoxDecoration(
+                                color: AppColors.accentGreen,
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                            SizedBox(width: 4.w),
+                            Text(
+                              'Available Now',
+                              style: textTheme.labelSmall?.copyWith(
+                                color: AppColors.textGray600,
+                                fontSize: 10.sp,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  SizedBox(height: 6.h),
-                  Row(
-                    children: [
-                      Container(
-                        width: 6.w,
-                        height: 6.w,
-                        decoration: const BoxDecoration(
-                          color: AppColors.accentGreen,
-                          shape: BoxShape.circle,
-                        ),
-                      ),
-                      SizedBox(width: 4.w),
-                      Text(
-                        'Available Now',
-                        style: textTheme.labelSmall?.copyWith(
-                          color: AppColors.accentGreen,
-                          fontSize: 10.sp,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
                   ),
                 ],
               ),

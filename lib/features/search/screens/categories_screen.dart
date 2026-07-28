@@ -86,7 +86,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                                 crossAxisCount: 3,
                                 mainAxisSpacing: 12.h,
                                 crossAxisSpacing: 12.w,
-                                childAspectRatio: 0.8,
+                                childAspectRatio: 1.1,
                               ),
                               itemCount: categories.length,
                               itemBuilder: (_, i) {
@@ -155,24 +155,17 @@ class _CategoryGridItem extends StatelessWidget {
       onTap: onTap,
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.backgroundWhite,
           borderRadius: BorderRadius.circular(12.r),
           border: Border.all(color: AppColors.borderLight),
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Container(
-              padding: EdgeInsets.all(12.w),
-              decoration: BoxDecoration(
-                color: AppColors.primarySurface,
-                borderRadius: BorderRadius.circular(12.r),
-              ),
-              child: Icon(
-                category.icon,
-                color: AppColors.authNavy,
-                size: 28.sp,
-              ),
+            Icon(
+              category.icon,
+              color: AppColors.authNavy,
+              size: 28.sp,
             ),
             SizedBox(height: 8.h),
             Text(

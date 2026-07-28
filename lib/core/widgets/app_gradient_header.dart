@@ -5,6 +5,7 @@ import '../../generated/assets.dart';
 /// Reusable purple gradient header used on dashboard, profile, and auth screens.
 class AppGradientHeader extends StatelessWidget {
   final String? title;
+  final String? subTitle;
   final Widget? child;
   final double height;
   final bool showBack;
@@ -13,6 +14,7 @@ class AppGradientHeader extends StatelessWidget {
   const AppGradientHeader({
     super.key,
     this.title,
+    this.subTitle,
     this.child,
     this.height = 220,
     this.showBack = false,
@@ -50,16 +52,34 @@ class AppGradientHeader extends StatelessWidget {
               top: MediaQuery.paddingOf(context).top + 16.h,
               left: 0,
               right: 0,
-              child: Text(
-                title!,
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w700,
-                      fontSize: 20.sp,
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(20.w, 0, 20.w, 40.h),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                       title!,
+                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 22.sp,
+                      ),
                     ),
+                    SizedBox(height: 8.h),
+                    if(subTitle != null)
+                    Text(
+                      subTitle!,
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: Colors.white.withValues(alpha: 0.85),
+                        fontSize: 13.sp,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
+
           if (child != null)
             Positioned(
               left: 0,
