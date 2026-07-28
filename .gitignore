@@ -11,7 +11,7 @@
 .svn/
 .swiftpm/
 migrate_working_dir/
-
+.ollamassist/conversations/c153b91f-ec18-499e-be86-0c0912dc03ae.json
 # IntelliJ related
 *.iml
 *.ipr

@@ -10,8 +10,6 @@ import '../../../core/services/app_services.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/widgets/app_gradient_header.dart';
 import '../../../core/widgets/empty_state.dart';
-import '../../../core/widgets/image_placeholder.dart';
-import '../../../core/widgets/loading_button.dart';
 import '../../customer/providers/post_task_provider.dart';
 
 class QuotesScreen extends StatefulWidget {

@@ -51,68 +51,25 @@ class MatchingTradersScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: AppColors.backgroundWhite,
-      body: CustomScrollView(
-        slivers: [
-          SliverToBoxAdapter(
-            child: AppGradientHeader(
-              height: 160.h,
-              child: Container(
-                padding: EdgeInsets.fromLTRB(20.w, MediaQuery.paddingOf(context).top + 10.h, 20.w, 20.h),
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: GestureDetector(
-                        onTap: () => context.pop(),
-                        child: Container(
-                          width: 40.w,
-                          height: 40.w,
-                          decoration: const BoxDecoration(
-                            color: Colors.white,
-                            shape: BoxShape.circle,
-                          ),
-                          child: Icon(Icons.chevron_left_rounded, color: AppColors.authPurple, size: 24.sp),
-                        ),
-                      ),
-                    ),
-                    Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          'Matching Traders',
-                          style: textTheme.headlineSmall?.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w700,
-                            fontSize: 20.sp,
-                          ),
-                        ),
-                        SizedBox(height: 4.h),
-                        Text(
-                          'We found 12 qualified professionals near you',
-                          style: textTheme.bodyMedium?.copyWith(
-                            color: Colors.white.withOpacity(0.9),
-                            fontSize: 12.sp,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
+      body: Column(
+        children: [
+          AppGradientHeader(
+            height: 180.h,
+            showBack: true,
+            title:  "Matching Traders" ,
+            subTitle:  'We found 12 qualified professionals near you',
+            onBack: () => context.pop(),
           ),
-          SliverToBoxAdapter(
+          Expanded(
             child: Transform.translate(
               offset: Offset(0, -30.h),
               child: Container(
+               padding: EdgeInsets.fromLTRB(20.w, 24.h, 20.w, 24.h),
                 decoration: BoxDecoration(
                   color: AppColors.backgroundWhite,
                   borderRadius: BorderRadius.vertical(top: Radius.circular(30.r)),
                 ),
-                padding: EdgeInsets.fromLTRB(20.w, 24.h, 20.w, 24.h),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                child: ListView(
                   children: [
                     _buildTaskSummaryCard(textTheme, postTaskProvider),
                     SizedBox(height: 20.h),
