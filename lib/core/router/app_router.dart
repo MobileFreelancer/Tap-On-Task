@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../features/trader/screens/job_confirmation_screen.dart';
+import '../../features/trader/screens/active_job_Screen.dart';
 import '../services/auth_service.dart';
 import '../widgets/app_bottom_nav.dart';
 import '../../features/auth/screens/splash_screen.dart';
@@ -18,6 +20,7 @@ import '../../features/search/screens/service_listing_screen.dart';
 import '../../features/booking/screens/service_detail_screen.dart';
 import '../../features/booking/screens/booking_flow_screens.dart';
 import '../../features/booking/screens/management_screens.dart';
+import '../../features/booking/screens/add_card_screen.dart';
 import '../../features/customer/screens/my_tasks_screen.dart';
 import '../../features/customer/screens/matching_traders_screen.dart';
 import '../../features/customer/screens/post_task_screen.dart';
@@ -25,6 +28,7 @@ import '../../features/location/screens/select_location_screen.dart';
 import '../../features/trader/screens/trader_dashboard.dart';
 import '../../features/trader/screens/available_tasks_screen.dart';
 import '../../features/trader/screens/my_bids_screen.dart';
+import '../../features/trader/screens/trader_detail_screen.dart';
 import '../../features/task/screens/task_detail_screen.dart';
 import '../../features/profile/screens/profile_screen.dart';
 import '../../features/profile/screens/edit_profile_screen.dart';
@@ -105,7 +109,7 @@ class AppRouter {
             name: 'quotes',
             builder: (_, state) => QuotesScreen(taskId: state.pathParameters['taskId']!),
           ),
-          
+
           GoRoute(path: '/customer/search', name: 'search', builder: (_, _) => const SearchScreen()),
           GoRoute(path: '/customer/my-tasks', name: 'myTasks', builder: (_, _) => const MyTasksScreen()),
           GoRoute(path: '/customer/messages', name: 'messages', builder: (_, _) => const MessagesScreen()),
@@ -152,6 +156,9 @@ class AppRouter {
           providerId: state.uri.queryParameters['providerId'],
         ),
       ),
+       GoRoute(path: '/job-confirmation', name: 'jobConfirmation', builder: (_, __) => const JobConfirmationScreen()),
+       GoRoute(path: '/active-job', name: 'activeJob', builder: (_, __) => const ActiveJobScreen()),
+       GoRoute(path: '/trader/detail', name: 'traderDetail', builder: (_, __) => const TraderDetailScreen()),
       GoRoute(path: '/booking-success', name: 'bookingSuccess', builder: (_, _) => const BookingSuccessScreen()),
       GoRoute(
         path: '/tracking/:bookingId',
@@ -167,6 +174,13 @@ class AppRouter {
         ),
       ),
       GoRoute(
+        path: '/add-card',
+        name: 'addCard',
+        builder: (_, _) => const AddCardScreen(),
+      ),
+      GoRoute(path: '/wallet', name: 'wallet', builder: (_, _) => const WalletScreen()),
+      GoRoute(path: '/notifications', name: 'notifications', builder: (_, _) => const NotificationsScreen()),
+      GoRoute(
         path: '/task/:taskId',
         name: 'taskDetail',
         builder: (_, state) => TaskDetailScreen(taskId: state.pathParameters['taskId']!),
@@ -180,8 +194,8 @@ class AppRouter {
 
   static int _customerNavIndex(String path) {
     if (path.startsWith('/customer/post-task')) return 0;
-    if (path.startsWith('/categories') || 
-        path.startsWith('/service-listing') || 
+    if (path.startsWith('/categories') ||
+        path.startsWith('/service-listing') ||
         path.startsWith('/location-select') ||
         path.startsWith('/matching-traders') ||
         path.startsWith('/quotes')) return 1;

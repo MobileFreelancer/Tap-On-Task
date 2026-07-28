@@ -80,7 +80,7 @@ class AuthScaffold extends StatelessWidget {
                 width: double.infinity,
                 decoration: BoxDecoration(
                   color: AppColors.backgroundWhite,
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(40.r)),
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withValues(alpha: 0.06),
