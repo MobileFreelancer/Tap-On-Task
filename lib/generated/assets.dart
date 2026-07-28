@@ -31,6 +31,9 @@ class AppAssets {
   static const String toolIcon = '$_imagePath/tool.png';
   static const String forwordimage = '$_imagePath/forwordimage.png';
   static const String appHeader = '$_imagePath/app_header.png';
+  static const String call = '$_imagePath/call.png';
+  static const String chat = '$_imagePath/chat.png';
+  static const String promocode = '$_imagePath/promocode.png';
 
   static const String iconHome = '$_iconPath/home.svg';
   static const String iconTasks = '$_iconPath/tasks.svg';

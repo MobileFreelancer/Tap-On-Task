@@ -53,7 +53,7 @@ class AppHeader extends StatelessWidget {
         Positioned(
           top: 45.h,
           left: 16.w,
-          right: 16.w,
+          right: 55.w,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -62,7 +62,7 @@ class AppHeader extends StatelessWidget {
                 children: [
                   if (!showBackButton) ...[
                     GestureDetector(
-                      onTap: () => Navigator.maybePop(context),
+                      onTap: () => Navigator.pop(context),
                       child: Container(
                         width: 36.w,
                         height: 36.h,

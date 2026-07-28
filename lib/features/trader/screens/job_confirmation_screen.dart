@@ -239,7 +239,10 @@ class _JobConfirmationScreenState extends State<JobConfirmationScreen> {
                   Expanded(
                     flex: 0,
                     child: GestureDetector(
-                      onTap: () => context.go('/trader/detail'),
+                      onTap: (){
+                        context.push('/trader/detail');
+                      },
+                      //onTap: () => context.go('/trader/detail'),
                       child: Image.asset(
                         AppAssets.forwordimage,
                         scale: 2.3,
@@ -463,13 +466,16 @@ class _QuoteDetailsSectionState extends State<QuoteDetailsSection> {
               child: Column(
                 spacing: 8.h,
                 children: [
-                  Container(
-                    padding: EdgeInsets.symmetric(horizontal: 35.w,vertical: 10.h),
-                    decoration: BoxDecoration(
-                      color: AppColors.primaryPurple,
-                      borderRadius: BorderRadius.circular(10.r)
+                  GestureDetector(
+                    onTap: () => context.push('/active-job'),
+                    child: Container(
+                      padding: EdgeInsets.symmetric(horizontal: 35.w,vertical: 10.h),
+                      decoration: BoxDecoration(
+                        color: AppColors.primaryPurple,
+                        borderRadius: BorderRadius.circular(10.r)
+                      ),
+                      child:Text("Accept Quote",style: TextStylesInApp.robotoBody(color: AppColors.backgroundWhite,fontSize: 16.sp,fontWeight: FontWeight.w400),),
                     ),
-                    child:Text("Accept Quote",style: TextStylesInApp.robotoBody(color: AppColors.backgroundWhite,fontSize: 16.sp,fontWeight: FontWeight.w400),),
                   ),
                   Text("Job will be assigned to\nMike Wilson",style: TextStylesInApp.robotoBody(color: AppColors.textGray400,fontSize: 14.sp,fontWeight: FontWeight.w400),textAlign: TextAlign.center,)
                 ],

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:tapontask/core/theme/text_styles.dart';
 
+import '../../../core/constants/app_colors.dart';
 import '../../../core/widgets/app_header.dart';
 
 class TraderDetailScreen extends StatelessWidget {
@@ -21,15 +23,10 @@ class TraderDetailScreen extends StatelessWidget {
                   children: [
                     const SizedBox(height: 16),
                     _buildProfileCard(),
-                    const SizedBox(height: 16),
                     _buildRatingSection(),
-                    const SizedBox(height: 16),
                     _buildAboutMeSection(),
-                    const SizedBox(height: 16),
                     _buildPortfolioSection(),
-                    const SizedBox(height: 16),
                     _buildServicesSection(),
-                    const SizedBox(height: 16),
                     _buildReviewsSection(),
                     const SizedBox(height: 24),
                   ],
@@ -44,83 +41,83 @@ class TraderDetailScreen extends StatelessWidget {
 
 
 
-  // --- Profile Card ---
+
   Widget _buildProfileCard() {
     return _buildCard(
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Profile Image
-          ClipRRect(
-            borderRadius: BorderRadius.circular(12),
-            child: Image.network(
-              'https://images.unsplash.com/photo-1540569014015-19a7be504e3a?w=150',
-              width: 90,
-              height: 100,
-              fit: BoxFit.cover,
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 10.h),
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.black.withValues(alpha: .1), width: .5),
+          color: AppColors.textGrayF9,
+          borderRadius: BorderRadius.circular(10.r),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+
+            ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: Image.network(
+                'https://images.unsplash.com/photo-1540569014015-19a7be504e3a?w=150',
+                width: 90,
+                height: 100,
+                fit: BoxFit.cover,
+              ),
             ),
-          ),
-          const SizedBox(width: 14),
-          // Details
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'Plumber',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF1A334E),
-                  ),
-                ),
-                const SizedBox(height: 2),
-                const Text(
-                  '10+ years experience',
-                  style: TextStyle(fontSize: 13, color: Colors.grey),
-                ),
-                const SizedBox(height: 6),
-                const Row(
-                  children: [
-                    Icon(Icons.location_on, size: 14, color: Colors.black87),
-                    SizedBox(width: 4),
+            const SizedBox(width: 14),
+            // Details
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
                     Text(
-                      '2 Km away',
-                      style: TextStyle(fontSize: 13, color: Colors.black87),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 4),
-                const Text(
-                  '8 jobs completed nearby',
-                  style: TextStyle(fontSize: 13, color: Colors.grey),
-                ),
-                const SizedBox(height: 6),
-                Row(
-                  children: [
-                    Container(
-                      width: 7,
-                      height: 7,
-                      decoration: const BoxDecoration(
-                        color: Colors.green,
-                        shape: BoxShape.circle,
+                    'Plumber',
+                    style:  TextStylesInApp.robotoBody(fontSize: 18.sp,color: AppColors.authNavy, fontWeight: FontWeight.w500),
+                  ),
+                  const SizedBox(height: 2),
+                    Text(
+                    '10+ years experience',
+                    style: TextStylesInApp.robotoBody(fontSize: 15.sp,color: AppColors.textGray500, fontWeight: FontWeight.w400),
+                  ),
+                  const SizedBox(height: 6),
+                    Row(
+                    children: [
+                      Icon(Icons.location_on, size: 14, color: Colors.black87),
+                      SizedBox(width: 4),
+                      Text(
+                        '2 Km away',
+                        style: TextStylesInApp.robotoBody(fontSize: 15.sp,color: AppColors.textGray500, fontWeight: FontWeight.w400),
                       ),
-                    ),
-                    const SizedBox(width: 6),
-                    const Text(
-                      'Available Today',
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: Colors.green,
-                        fontWeight: FontWeight.w500,
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                    Text(
+                    '8 jobs completed nearby',
+                    style:  TextStylesInApp.robotoBody(fontSize: 15.sp,color: AppColors.textGray500, fontWeight: FontWeight.w400),
+                  ),
+                  const SizedBox(height: 6),
+                  Row(
+                    children: [
+                      Container(
+                        width: 7,
+                        height: 7,
+                        decoration: const BoxDecoration(
+                          color: Colors.green,
+                          shape: BoxShape.circle,
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-              ],
+                      const SizedBox(width: 6),
+                        Text(
+                        'Available Today',
+                        style: TextStylesInApp.robotoBody(fontSize: 15.sp,color: AppColors.textGray500, fontWeight: FontWeight.w400),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -128,55 +125,66 @@ class TraderDetailScreen extends StatelessWidget {
   // --- Rating Breakdown Card ---
   Widget _buildRatingSection() {
     return _buildCard(
-      child: Row(
-        children: [
-          // Overall Rating
-          Expanded(
-            flex: 2,
-            child: Column(
-              children: [
-                const Text(
-                  '4.8',
-                  style: TextStyle(
-                    fontSize: 32,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF1A334E),
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 10.h),
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.black.withValues(alpha: .1), width: .5),
+          color: AppColors.textGrayF9,
+          borderRadius: BorderRadius.circular(10.r),
+        ),
+        child: Row(
+          children: [
+            // Overall Rating
+            Expanded(
+              flex: 2,
+              child: Column(
+
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Text(
+                        '4.8 ',
+                        style: TextStylesInApp.robotoBody(fontSize: 24.sp,color: AppColors.authNavy, fontWeight: FontWeight.w600),
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: List.generate(
+                          5,
+                              (index) => const Icon(
+                            Icons.star,
+                            size: 16,
+                            color: Colors.orange,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: List.generate(
-                    5,
-                        (index) => const Icon(
-                      Icons.star,
-                      size: 14,
-                      color: Colors.orange,
-                    ),
+
+                  const SizedBox(height: 4),
+                    Text(
+                    '125 Reviews',
+                    style: TextStylesInApp.robotoBody(fontSize: 13.sp,color: AppColors.textGray500, fontWeight: FontWeight.w400),
                   ),
-                ),
-                const SizedBox(height: 4),
-                const Text(
-                  '125 Reviews',
-                  style: TextStyle(fontSize: 12, color: Colors.grey),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-          const ContainerDivider(),
-          // Progress Bars
-          Expanded(
-            flex: 3,
-            child: Column(
-              children: [
-                _buildRatingBar(5, 0.85, '84'),
-                _buildRatingBar(4, 0.40, '25'),
-                _buildRatingBar(3, 0.90, '10', highlighted: true),
-                _buildRatingBar(2, 0.20, '3'),
-                _buildRatingBar(1, 0.15, '3'),
-              ],
+            const ContainerDivider(),
+            // Progress Bars
+            Expanded(
+              flex: 3,
+              child: Column(
+                children: [
+                  _buildRatingBar(5, 0.85, '84'),
+                  _buildRatingBar(4, 0.40, '25'),
+                  _buildRatingBar(3, 0.90, '10',),
+                  _buildRatingBar(2, 0.20, '3'),
+                  _buildRatingBar(1, 0.15, '3'),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -184,12 +192,12 @@ class TraderDetailScreen extends StatelessWidget {
   Widget _buildRatingBar(int starNum, double percent, String count,
       {bool highlighted = false}) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 2.0),
+      padding:   EdgeInsets.symmetric(vertical: 2.0),
       child: Row(
         children: [
           Text(
             '$starNum',
-            style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
+            style:   TextStylesInApp.robotoBody(fontSize: 13.sp,color: AppColors.authNavy, fontWeight: FontWeight.w400),
           ),
           const SizedBox(width: 2),
           const Icon(Icons.star, size: 10, color: Colors.orange),
@@ -233,29 +241,29 @@ class TraderDetailScreen extends StatelessWidget {
   // --- About Me Section ---
   Widget _buildAboutMeSection() {
     return _buildCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'About Me',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF1A334E),
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 10.h),
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.black.withValues(alpha: .1), width: .5),
+          color: AppColors.textGrayF9,
+          borderRadius: BorderRadius.circular(10.r),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+              Text(
+              'About Me',
+              style: TextStylesInApp.robotoBody(fontSize: 18.sp,color: AppColors.authNavy, fontWeight: FontWeight.w600),
             ),
-          ),
-          const SizedBox(height: 8),
-          const Divider(height: 1, color: Color(0xFFEEEEEE)),
-          const SizedBox(height: 12),
-          const Text(
-            'Skilled handyman offering plumbing, electrical, and home repair services reliable and professional.',
-            style: TextStyle(
-              fontSize: 13,
-              color: Color(0xFF556575),
-              height: 1.4,
+            const SizedBox(height: 8),
+            const Divider(height: 1, color: Color(0xFFEEEEEE)),
+            const SizedBox(height: 12),
+              Text(
+              'Skilled handyman offering plumbing, electrical, and home repair services reliable and professional.',
+              style: TextStylesInApp.robotoBody(fontSize: 15.sp,color: AppColors.textGray500, fontWeight: FontWeight.w400),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -269,36 +277,40 @@ class TraderDetailScreen extends StatelessWidget {
     ];
 
     return _buildCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Portfolio',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF1A334E),
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 10.h),
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.black.withValues(alpha: .1), width: .5),
+          color: AppColors.textGrayF9,
+          borderRadius: BorderRadius.circular(10.r),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+              Text(
+              'Portfolio',
+              style: TextStylesInApp.robotoBody(fontSize: 18.sp,color: AppColors.authNavy, fontWeight: FontWeight.w600),
             ),
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: images.map((url) {
-              return Expanded(
-                child: Container(
-                  margin: const EdgeInsets.only(right: 8),
-                  height: 70,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(8),
-                    image: DecorationImage(
-                      image: NetworkImage(url),
-                      fit: BoxFit.cover,
+            const SizedBox(height: 12),
+            Row(
+              children: images.map((url) {
+                return Expanded(
+                  child: Container(
+                    margin: const EdgeInsets.only(right: 8),
+                    height: 70,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(8),
+                      image: DecorationImage(
+                        image: NetworkImage(url),
+                        fit: BoxFit.cover,
+                      ),
                     ),
                   ),
-                ),
-              );
-            }).toList(),
-          ),
-        ],
+                );
+              }).toList(),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -306,24 +318,28 @@ class TraderDetailScreen extends StatelessWidget {
   // --- My Services Section ---
   Widget _buildServicesSection() {
     return _buildCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'My Services',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF1A334E),
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 10.h),
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.black.withValues(alpha: .1), width: .5),
+          color: AppColors.textGrayF9,
+          borderRadius: BorderRadius.circular(10.r),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+              Text(
+              'My Services',
+              style: TextStylesInApp.robotoBody(fontSize: 18.sp,color: AppColors.authNavy, fontWeight: FontWeight.w600),
             ),
-          ),
-          const SizedBox(height: 10),
-          _buildBulletPoint('Plumbing, Electrical, Carpentry'),
-          const SizedBox(height: 6),
-          _buildBulletPoint('Starting at \$50'),
-          const SizedBox(height: 6),
-          _buildBulletPoint('Typically responds in 1 hour'),
-        ],
+            const SizedBox(height: 10),
+            _buildBulletPoint('Plumbing, Electrical, Carpentry'),
+            const SizedBox(height: 6),
+            _buildBulletPoint('Starting at \$50'),
+            const SizedBox(height: 6),
+            _buildBulletPoint('Typically responds in 1 hour'),
+          ],
+        ),
       ),
     );
   }
@@ -342,7 +358,7 @@ class TraderDetailScreen extends StatelessWidget {
         const SizedBox(width: 8),
         Text(
           text,
-          style: const TextStyle(fontSize: 13, color: Color(0xFF556575)),
+          style: TextStylesInApp.robotoBody(fontSize: 16.sp,color: AppColors.textGray500, fontWeight: FontWeight.w400),
         ),
       ],
     );
@@ -351,88 +367,80 @@ class TraderDetailScreen extends StatelessWidget {
   // --- Reviews Section ---
   Widget _buildReviewsSection() {
     return _buildCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text(
-                'Reviews',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF1A334E),
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 10.h),
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.black.withValues(alpha: .1), width: .5),
+          color: AppColors.textGrayF9,
+          borderRadius: BorderRadius.circular(10.r),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                  Text(
+                  'Reviews',
+                  style: TextStylesInApp.robotoBody(fontSize: 18.sp,color: AppColors.authNavy, fontWeight: FontWeight.w600),
                 ),
-              ),
-              GestureDetector(
-                onTap: () {},
-                child: const Text(
-                  'View All',
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF1A334E),
+                GestureDetector(
+                  onTap: () {},
+                  child:   Text(
+                    'View All',
+                    style: TextStylesInApp.robotoBody(fontSize: 18.sp,color: AppColors.authNavy, fontWeight: FontWeight.w600),
                   ),
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // User Avatar
-              const CircleAvatar(
-                radius: 20,
-                backgroundImage: NetworkImage(
-                  'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100',
+              ],
+            ),
+            const SizedBox(height: 12),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // User Avatar
+                const CircleAvatar(
+                  radius: 20,
+                  backgroundImage: NetworkImage(
+                    'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100',
+                  ),
                 ),
-              ),
-              const SizedBox(width: 10),
-              // Name, Rating & Comment
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        const Text(
-                          'Sarah M.',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                            color: Color(0xFF1A334E),
+                const SizedBox(width: 10),
+                // Name, Rating & Comment
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                            Text(
+                            'Sarah M.',
+                            style: TextStylesInApp.robotoBody(fontSize: 18.sp,color: AppColors.authNavy, fontWeight: FontWeight.w600),
                           ),
-                        ),
-                        const SizedBox(width: 8),
-                        Row(
-                          children: List.generate(
-                            5,
-                                (index) => const Icon(
-                              Icons.star,
-                              size: 12,
-                              color: Colors.orange,
+                          const SizedBox(width: 8),
+                          Row(
+                            children: List.generate(
+                              5,
+                                  (index) => const Icon(
+                                Icons.star,
+                                size: 12,
+                                color: Colors.orange,
+                              ),
                             ),
                           ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 4),
-                    const Text(
-                      'Great work! Fixed my leaky sink quickly. Highly recommended!',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Color(0xFF556575),
-                        height: 1.3,
+                        ],
                       ),
-                    ),
-                  ],
+                      const SizedBox(height: 4),
+                        Text(
+                        'Great work! Fixed my leaky sink quickly. Highly recommended!',
+                        style: TextStylesInApp.robotoBody(fontSize: 16.sp,color: AppColors.textGray500, fontWeight: FontWeight.w400),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ],
-          ),
-        ],
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -13,6 +13,8 @@ import 'core/router/app_router.dart';
 import 'features/auth/providers/auth_form_provider.dart';
 import 'features/customer/providers/post_task_provider.dart';
 import 'features/location/providers/location_provider.dart';
+import 'features/auth/providers/active_job_provider.dart';
+
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -41,6 +43,7 @@ Future<void> main() async {
         ChangeNotifierProvider(create: (_) => NotificationService()),
         ChangeNotifierProvider(create: (_) => PostTaskProvider()),
         ChangeNotifierProvider(create: (_) => LocationProvider()),
+        ChangeNotifierProvider(create: (_) => ActiveJobProvider()),
       ],
       child: TapOnTaskApp(firebaseReady: firebaseReady),
     ),
