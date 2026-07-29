@@ -1,53 +1,68 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/widgets/app_gradient_header.dart';
+import '../../location/providers/location_provider.dart';
 import '../providers/post_task_provider.dart';
 
-class MatchingTradersScreen extends StatelessWidget {
+class MatchingTradersScreen extends StatefulWidget {
   final String taskId;
   const MatchingTradersScreen({super.key, required this.taskId});
+
+  @override
+  State<MatchingTradersScreen> createState() => _MatchingTradersScreenState();
+}
+
+class _MatchingTradersScreenState extends State<MatchingTradersScreen> {
+  GoogleMapController? _mapController;
+
+  final List<_TraderMock> _mockTraders = [
+    _TraderMock(
+      name: 'Mike Wilson',
+      rating: '4.8',
+      category: 'Plumber',
+      experience: '10+ years experience',
+      distance: '2 Km away',
+      jobsCompleted: '8 jobs completed nearby',
+      imageUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop',
+      latLng: const LatLng(43.6550, -79.3850),
+    ),
+    _TraderMock(
+      name: 'Sarah Smith',
+      rating: '4.9',
+      category: 'Electrician',
+      experience: '8+ years experience',
+      distance: '3 Km away',
+      jobsCompleted: '15 jobs completed nearby',
+      imageUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&auto=format&fit=crop',
+      latLng: const LatLng(43.6600, -79.3900),
+    ),
+    _TraderMock(
+      name: 'John Davis',
+      rating: '4.7',
+      category: 'Handyman',
+      experience: '5 years experience',
+      distance: '1.5 Km away',
+      jobsCompleted: '5 jobs completed nearby',
+      imageUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop',
+      latLng: const LatLng(43.6500, -79.3750),
+    ),
+  ];
+
+  @override
+  void dispose() {
+    _mapController?.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     final postTaskProvider = context.watch<PostTaskProvider>();
-
-    // Mock profiles with different photos matching the style
-    final mockTraders = [
-      _TraderMock(
-        name: 'Mike Wilson',
-        rating: '4.8',
-        category: 'Plumber',
-        price: 'CAD ${postTaskProvider.estimatedBudget > 0 ? postTaskProvider.estimatedBudget.toInt() : 120}',
-        experience: '10+ years experience',
-        distance: '2 Km away',
-        jobsCompleted: '8 jobs completed nearby',
-        imageUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop',
-      ),
-      _TraderMock(
-        name: 'Sarah Smith',
-        rating: '4.9',
-        category: 'Electrician',
-        price: 'CAD 150',
-        experience: '8+ years experience',
-        distance: '3 Km away',
-        jobsCompleted: '15 jobs completed nearby',
-        imageUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&auto=format&fit=crop',
-      ),
-      _TraderMock(
-        name: 'John Davis',
-        rating: '4.7',
-        category: 'Handyman',
-        price: 'CAD 90',
-        experience: '5 years experience',
-        distance: '1.5 Km away',
-        jobsCompleted: '5 jobs completed nearby',
-        imageUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop',
-      ),
-    ];
+    final locationProvider = context.watch<LocationProvider>();
 
     return Scaffold(
       backgroundColor: AppColors.backgroundWhite,
@@ -56,15 +71,15 @@ class MatchingTradersScreen extends StatelessWidget {
           AppGradientHeader(
             height: 180.h,
             showBack: true,
-            title:  "Matching Traders" ,
-            subTitle:  'We found 12 qualified professionals near you',
+            title: "Matching Traders",
+            subTitle: 'We found ${_mockTraders.length} qualified professionals near you',
             onBack: () => context.canPop() ? context.pop() : context.go('/customer/dashboard'),
           ),
           Expanded(
             child: Transform.translate(
               offset: Offset(0, -30.h),
               child: Container(
-               padding: EdgeInsets.fromLTRB(20.w, 24.h, 20.w, 24.h),
+                padding: EdgeInsets.fromLTRB(20.w, 24.h, 20.w, 0),
                 decoration: BoxDecoration(
                   color: AppColors.backgroundWhite,
                   borderRadius: BorderRadius.vertical(top: Radius.circular(30.r)),
@@ -73,23 +88,22 @@ class MatchingTradersScreen extends StatelessWidget {
                   children: [
                     _buildTaskSummaryCard(textTheme, postTaskProvider),
                     SizedBox(height: 20.h),
-                    _buildMiniMap(),
+                    _buildRealMap(locationProvider),
                     SizedBox(height: 24.h),
-                    ...List.generate(mockTraders.length, (index) {
-                      final trader = mockTraders[index];
+                    ..._mockTraders.map((trader) {
                       return _buildTraderCard(
                         textTheme: textTheme,
                         name: trader.name,
                         rating: trader.rating,
                         category: trader.category,
-                        price: trader.price,
+                        price: 'CAD ${postTaskProvider.estimatedBudget.toInt()}',
                         experience: trader.experience,
                         distance: trader.distance,
                         jobsCompleted: trader.jobsCompleted,
                         isAvailableToday: true,
                         buttonText: 'View Profile',
                         onButtonPressed: () {
-                          context.pushNamed('quotes', pathParameters: {'taskId': taskId});
+                          context.pushNamed('quotes', pathParameters: {'taskId': widget.taskId});
                         },
                         imageUrl: trader.imageUrl,
                       );
@@ -114,7 +128,7 @@ class MatchingTradersScreen extends StatelessWidget {
           ],
         ),
         child: ElevatedButton(
-          onPressed: () => context.pushNamed('quotes', pathParameters: {'taskId': taskId}),
+          onPressed: () => context.pushNamed('quotes', pathParameters: {'taskId': widget.taskId}),
           style: ElevatedButton.styleFrom(
             backgroundColor: AppColors.authPurple,
             foregroundColor: Colors.white,
@@ -160,9 +174,7 @@ class MatchingTradersScreen extends StatelessWidget {
                 ],
               ),
               GestureDetector(
-                onTap: () {
-                  // Wait, no need to navigate, or navigate back to edit
-                },
+                onTap: () => context.pop(),
                 child: Row(
                   children: [
                     Icon(Icons.edit_outlined, color: AppColors.authPurple, size: 14.sp),
@@ -205,67 +217,36 @@ class MatchingTradersScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildMiniMap() {
+  Widget _buildRealMap(LocationProvider locationProvider) {
     return Container(
-      height: 155.h,
+      height: 200.h,
       decoration: BoxDecoration(
-        color: AppColors.primarySurface,
         borderRadius: BorderRadius.circular(16.r),
-        image: const DecorationImage(
-          image: AssetImage('assets/images/mock_map.png'),
-          fit: BoxFit.cover,
-        ),
+        border: Border.all(color: AppColors.borderLight),
       ),
-      child: Stack(
-        children: [
-          Positioned(
-            left: 12.w,
-            bottom: 12.h,
-            child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(20.r),
-                boxShadow: [
-                  BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 4, offset: const Offset(0, 2)),
-                ],
-              ),
-              child: Row(
-                children: [
-                  Text(
-                    'Sort by: Best Match',
-                    style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w600, color: AppColors.textGray700),
-                  ),
-                  Icon(Icons.keyboard_arrow_down_rounded, size: 14.sp, color: AppColors.textGray600),
-                ],
-              ),
-            ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16.r),
+        child: GoogleMap(
+          initialCameraPosition: CameraPosition(
+            target: locationProvider.selectedLatLng,
+            zoom: 13,
           ),
-          Positioned(
-            right: 12.w,
-            bottom: 12.h,
-            child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(20.r),
-                boxShadow: [
-                  BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 4, offset: const Offset(0, 2)),
-                ],
-              ),
-              child: Row(
-                children: [
-                  Icon(Icons.map_outlined, size: 14.sp, color: AppColors.authPurple),
-                  SizedBox(width: 4.w),
-                  Text(
-                    'View on Map',
-                    style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.bold, color: AppColors.authPurple),
-                  ),
-                ],
-              ),
+          onMapCreated: (controller) => _mapController = controller,
+          markers: {
+            Marker(
+              markerId: const MarkerId('user_location'),
+              position: locationProvider.selectedLatLng,
+              icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueAzure),
             ),
-          ),
-        ],
+            ..._mockTraders.map((t) => Marker(
+                  markerId: MarkerId(t.name),
+                  position: t.latLng,
+                  infoWindow: InfoWindow(title: t.name, snippet: t.category),
+                )),
+          },
+          zoomControlsEnabled: false,
+          myLocationButtonEnabled: false,
+        ),
       ),
     );
   }
@@ -309,14 +290,12 @@ class MatchingTradersScreen extends StatelessWidget {
               width: 80.w,
               height: 90.h,
               fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) {
-                return Container(
-                  width: 80.w,
-                  height: 90.h,
-                  color: Colors.grey[200],
-                  child: Icon(Icons.person, color: Colors.grey[400]),
-                );
-              },
+              errorBuilder: (context, error, stackTrace) => Container(
+                width: 80.w,
+                height: 90.h,
+                color: Colors.grey[200],
+                child: Icon(Icons.person, color: Colors.grey[400]),
+              ),
             ),
           ),
           SizedBox(width: 12.w),
@@ -329,85 +308,36 @@ class MatchingTradersScreen extends StatelessWidget {
                   children: [
                     Text(
                       name,
-                      style: TextStyle(
-                        fontSize: 14.sp,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.authNavy,
-                      ),
+                      style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold, color: AppColors.authNavy),
                     ),
                     Container(
                       padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFFEF9C3),
-                        borderRadius: BorderRadius.circular(4.r),
-                      ),
+                      decoration: BoxDecoration(color: const Color(0xFFFEF9C3), borderRadius: BorderRadius.circular(4.r)),
                       child: Row(
                         children: [
                           Icon(Icons.star_rounded, color: Colors.amber[700], size: 12.sp),
                           SizedBox(width: 2.w),
-                          Text(
-                            rating,
-                            style: TextStyle(
-                              fontSize: 10.sp,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.amber[900],
-                            ),
-                          ),
+                          Text(rating, style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.bold, color: Colors.amber[900])),
                         ],
                       ),
                     ),
                   ],
                 ),
                 SizedBox(height: 4.h),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      category,
-                      style: TextStyle(fontSize: 12.sp, color: AppColors.textGray500),
-                    ),
-                    Text.rich(
-                      TextSpan(
-                        text: 'Fixed Price ',
-                        style: TextStyle(fontSize: 11.sp, color: AppColors.textGray500),
-                        children: [
-                          TextSpan(
-                            text: price,
-                            style: TextStyle(
-                              fontSize: 11.sp,
-                              fontWeight: FontWeight.bold,
-                              color: const Color(0xFF1E3A8A),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
+                Text(category, style: TextStyle(fontSize: 12.sp, color: AppColors.textGray500)),
                 SizedBox(height: 4.h),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      experience,
-                      style: TextStyle(fontSize: 12.sp, color: AppColors.textGray500),
-                    ),
+                    Text(experience, style: TextStyle(fontSize: 12.sp, color: AppColors.textGray500)),
                     Row(
                       children: [
                         Icon(Icons.location_on, color: Colors.red[400], size: 12.sp),
                         SizedBox(width: 2.w),
-                        Text(
-                          distance,
-                          style: TextStyle(fontSize: 11.sp, color: AppColors.textGray500),
-                        ),
+                        Text(distance, style: TextStyle(fontSize: 11.sp, color: AppColors.textGray500)),
                       ],
                     ),
                   ],
-                ),
-                SizedBox(height: 4.h),
-                Text(
-                  jobsCompleted,
-                  style: TextStyle(fontSize: 12.sp, color: AppColors.textGray500),
                 ),
                 SizedBox(height: 8.h),
                 Row(
@@ -416,44 +346,22 @@ class MatchingTradersScreen extends StatelessWidget {
                     if (isAvailableToday)
                       Row(
                         children: [
-                          Container(
-                            width: 6.w,
-                            height: 6.w,
-                            decoration: const BoxDecoration(
-                              color: Colors.green,
-                              shape: BoxShape.circle,
-                            ),
-                          ),
+                          Container(width: 6.w, height: 6.w, decoration: const BoxDecoration(color: Colors.green, shape: BoxShape.circle)),
                           SizedBox(width: 6.w),
-                          Text(
-                            'Available Today',
-                            style: TextStyle(
-                              fontSize: 11.sp,
-                              color: Colors.green,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
+                          Text('Available Today', style: TextStyle(fontSize: 11.sp, color: Colors.green, fontWeight: FontWeight.w600)),
                         ],
-                      )
-                    else
-                      const SizedBox.shrink(),
+                      ),
                     SizedBox(
-                       height: 28.h,
+                      height: 28.h,
                       child: ElevatedButton(
                         onPressed: onButtonPressed,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.authPurple,
                           foregroundColor: Colors.white,
                           padding: EdgeInsets.symmetric(horizontal: 14.w),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(6.r),
-                          ),
-                          elevation: 0,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6.r)),
                         ),
-                        child: Text(
-                          buttonText,
-                          style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.bold),
-                        ),
+                        child: Text(buttonText, style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.bold)),
                       ),
                     ),
                   ],
@@ -471,20 +379,20 @@ class _TraderMock {
   final String name;
   final String rating;
   final String category;
-  final String price;
   final String experience;
   final String distance;
   final String jobsCompleted;
   final String imageUrl;
+  final LatLng latLng;
 
   _TraderMock({
     required this.name,
     required this.rating,
     required this.category,
-    required this.price,
     required this.experience,
     required this.distance,
     required this.jobsCompleted,
     required this.imageUrl,
+    required this.latLng,
   });
 }

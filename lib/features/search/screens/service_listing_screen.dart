@@ -3,9 +3,11 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/models/api_category_model.dart';
 import '../../../core/models/service_model.dart';
 import '../../../core/services/app_services.dart';
 import '../../../core/widgets/app_gradient_header.dart';
+import '../../customer/providers/post_task_provider.dart';
 
 class ServiceListingScreen extends StatefulWidget {
   final String categoryId;
@@ -17,24 +19,34 @@ class ServiceListingScreen extends StatefulWidget {
 }
 
 class _ServiceListingScreenState extends State<ServiceListingScreen> {
-  List<ServiceModel> _services = [];
-  bool _isLoading = true;
-
   @override
   void initState() {
     super.initState();
-    _loadData();
-  }
-
-  Future<void> _loadData() async {
-    final searchService = context.read<SearchService>();
-    _services = await searchService.getServicesByCategory(widget.categoryId);
-    if (mounted) setState(() => _isLoading = false);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final provider = context.read<PostTaskProvider>();
+      if (provider.categories.isEmpty) {
+        provider.fetchCategories();
+      }
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
+    final provider = context.watch<PostTaskProvider>();
+    
+    // Find the current category and its subcategories
+    ApiCategory? currentCategory;
+    try {
+      currentCategory = provider.categories.firstWhere(
+        (c) => c.id.toString() == widget.categoryId,
+      );
+    } catch (_) {
+      currentCategory = null;
+    }
+
+    final subcategories = currentCategory?.subcategories ?? [];
+    final isLoading = provider.isLoadingCategories && provider.categories.isEmpty;
 
     return Scaffold(
       backgroundColor: AppColors.backgroundWhite,
@@ -78,13 +90,27 @@ class _ServiceListingScreenState extends State<ServiceListingScreen> {
                   color: AppColors.backgroundWhite,
                   borderRadius: BorderRadius.vertical(top: Radius.circular(30.r)),
                 ),
-                child: _isLoading
+                child: isLoading
                     ? const Center(child: CircularProgressIndicator())
-                    : _services.isEmpty
+                    : subcategories.isEmpty
                         ? Center(
-                            child: Text(
-                              'No services in this category',
-                              style: textTheme.bodyMedium?.copyWith(color: AppColors.textGray500),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.search_off_rounded, size: 64.sp, color: AppColors.textGray400),
+                                SizedBox(height: 16.h),
+                                Text(
+                                  'No specific services found',
+                                  style: textTheme.bodyMedium?.copyWith(color: AppColors.textGray500),
+                                ),
+                                if (provider.categoryError != null) ...[
+                                  SizedBox(height: 8.h),
+                                  ElevatedButton(
+                                    onPressed: () => provider.fetchCategories(),
+                                    child: const Text('Retry'),
+                                  ),
+                                ]
+                              ],
                             ),
                           )
                         : GridView.builder(
@@ -95,11 +121,19 @@ class _ServiceListingScreenState extends State<ServiceListingScreen> {
                               crossAxisSpacing: 16.w,
                               childAspectRatio: 1,
                             ),
-                            itemCount: _services.length,
+                            itemCount: subcategories.length,
                             itemBuilder: (_, i) {
                               return _ServiceGridItem(
-                                service: _services[i],
-                                onTap: () => context.pushNamed('locationSelect'),
+                                subcategory: subcategories[i],
+                                categoryName: widget.categoryName,
+                                onTap: () {
+                                  // Update provider state
+                                  provider.selectCategory(widget.categoryId);
+                                  provider.selectSubcategory(subcategories[i].id.toString());
+
+                                  // Navigate to location selection
+                                  context.pushNamed('locationSelect');
+                                },
                               );
                             },
                           ),
@@ -113,11 +147,13 @@ class _ServiceListingScreenState extends State<ServiceListingScreen> {
 }
 
 class _ServiceGridItem extends StatelessWidget {
-  final ServiceModel service;
+  final ApiSubcategory subcategory;
+  final String categoryName;
   final VoidCallback onTap;
 
   const _ServiceGridItem({
-    required this.service,
+    required this.subcategory,
+    required this.categoryName,
     required this.onTap,
   });
 
@@ -175,7 +211,7 @@ class _ServiceGridItem extends StatelessWidget {
                           children: [
                             Expanded(
                               child: Text(
-                                service.title,
+                                subcategory.name,
                                 style: textTheme.bodyMedium?.copyWith(
                                   fontWeight: FontWeight.w600,
                                   fontSize: 12.sp,
@@ -199,12 +235,14 @@ class _ServiceGridItem extends StatelessWidget {
                               ),
                             ),
                             SizedBox(width: 4.w),
-                            Text(
-                              'Available Now',
-                              style: textTheme.labelSmall?.copyWith(
-                                color: AppColors.textGray600,
-                                fontSize: 10.sp,
-                                fontWeight: FontWeight.w500,
+                            Expanded(
+                              child: Text(
+                                subcategory.slug,
+                                style: textTheme.labelSmall?.copyWith(
+                                  color: AppColors.textGray600,
+                                  fontSize: 10.sp,
+                                  fontWeight: FontWeight.w500,
+                                ),
                               ),
                             ),
                           ],
