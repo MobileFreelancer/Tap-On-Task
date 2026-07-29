@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:tapontask/core/theme/text_styles.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/widgets/app_gradient_header.dart';
 import '../../auth/widgets/auth_scaffold.dart';
@@ -83,9 +84,7 @@ class _PostTaskScreenState extends State<PostTaskScreen> {
                   color: AppColors.backgroundWhite,
                   borderRadius: BorderRadius.vertical(top: Radius.circular(30.r)),
                 ),
-                child: postTaskProvider.isLoadingCategories
-                    ? const Center(child: CircularProgressIndicator())
-                    : postTaskProvider.categoryError != null
+                child:  postTaskProvider.categoryError != null
                         ? Center(
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
@@ -99,7 +98,7 @@ class _PostTaskScreenState extends State<PostTaskScreen> {
                             ),
                           )
                         : SingleChildScrollView(
-                            padding: EdgeInsets.fromLTRB(20.w, 24.h, 20.w, 24.h),
+                            padding: EdgeInsets.fromLTRB(12.w, 24.h, 12.w, 24.h),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
@@ -112,34 +111,151 @@ class _PostTaskScreenState extends State<PostTaskScreen> {
                                   SizedBox(height: 8.h),
                                   _buildSubcategoryDropdown(postTaskProvider),
                                 ],
-                                SizedBox(height: 24.h),
-                                _buildSectionLabelWithIcon(
-                                  Icons.description_outlined,
-                                  'Task Description',
-                                  textTheme,
-                                  subtitle: 'Provide a detailed description of your task',
+                                SizedBox(height: 15.h),
+                                Container(
+                                  padding: EdgeInsets.all(13.w),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(18.r),
+                                    border: Border.all(
+                                      color: const Color(0xFFF1F3F6),
+                                      width: 1,
+                                    ),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: const Color(0x14000000), // 8% black
+                                        offset: const Offset(0, 4),
+                                        blurRadius: 18,
+                                        spreadRadius: 0,
+                                      ),
+                                      BoxShadow(
+                                        color: const Color(0x08A3B1C6), // subtle blue shadow
+                                        offset: const Offset(0, 1),
+                                        blurRadius: 4,
+                                        spreadRadius: 0,
+                                      ),
+                                    ],
+                                  ),
+                                  child:  Column(
+                                    children: [
+                                      _buildSectionLabelWithIcon(
+                                        Icons.description_outlined,
+                                        'Task Description',
+                                        textTheme,
+                                        subtitle: 'Provide a detailed description of your task',
+                                      ),
+                                      SizedBox(height: 12.h),
+                                      _buildDescriptionField(postTaskProvider, textTheme),
+                                    ],
+                                  ),
                                 ),
-                                SizedBox(height: 12.h),
-                                _buildDescriptionField(postTaskProvider, textTheme),
-                                SizedBox(height: 24.h),
+
+                                SizedBox(height: 15.h),
                                 _buildPhotoSection(postTaskProvider, textTheme),
-                                SizedBox(height: 24.h),
-                                _buildSectionLabelWithIcon(Icons.location_on_outlined, 'Location', textTheme),
-                                SizedBox(height: 12.h),
-                                _buildLocationSection(postTaskProvider, textTheme),
-                                SizedBox(height: 24.h),
-                                _buildSectionLabelWithIcon(Icons.calendar_today_outlined, 'Preferred Date & Time', textTheme),
-                                SizedBox(height: 12.h),
-                                _buildDateTimeSection(postTaskProvider, textTheme),
-                                SizedBox(height: 24.h),
-                                _buildSectionLabelWithIcon(
-                                  Icons.monetization_on_outlined,
-                                  'Set your estimated budget',
-                                  textTheme,
-                                  subtitle: '(optional)',
+                                SizedBox(height: 15.h),
+                                Container(
+                                  padding: EdgeInsets.all(13.w),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(18.r),
+                                    border: Border.all(
+                                      color: const Color(0xFFF1F3F6),
+                                      width: 1,
+                                    ),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: const Color(0x14000000), // 8% black
+                                        offset: const Offset(0, 4),
+                                        blurRadius: 18,
+                                        spreadRadius: 0,
+                                      ),
+                                      BoxShadow(
+                                        color: const Color(0x08A3B1C6), // subtle blue shadow
+                                        offset: const Offset(0, 1),
+                                        blurRadius: 4,
+                                        spreadRadius: 0,
+                                      ),
+                                    ],
+                                  ),
+                                  child: Column(
+                                    children: [
+                                      _buildSectionLabelWithIcon(Icons.location_on_outlined, 'Location', textTheme),
+                                      SizedBox(height: 12.h),
+                                      _buildLocationSection(postTaskProvider, textTheme),
+                                    ],
+                                  ),
                                 ),
-                                SizedBox(height: 12.h),
-                                _buildBudgetField(postTaskProvider, textTheme),
+                                SizedBox(height: 15.h),
+                                Container(
+                                  padding: EdgeInsets.all(13.w),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(18.r),
+                                    border: Border.all(
+                                      color: const Color(0xFFF1F3F6),
+                                      width: 1,
+                                    ),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: const Color(0x14000000), // 8% black
+                                        offset: const Offset(0, 4),
+                                        blurRadius: 18,
+                                        spreadRadius: 0,
+                                      ),
+                                      BoxShadow(
+                                        color: const Color(0x08A3B1C6), // subtle blue shadow
+                                        offset: const Offset(0, 1),
+                                        blurRadius: 4,
+                                        spreadRadius: 0,
+                                      ),
+                                    ],
+                                  ),
+                                  child: Column(
+                                    children: [
+                                      _buildSectionLabelWithIcon(Icons.calendar_month, 'Preferred Date & Time', textTheme),
+                                      SizedBox(height: 12.h),
+                                      _buildDateTimeSection(postTaskProvider, textTheme),
+                                    ],
+                                  ),
+                                ),
+                                SizedBox(height: 15.h),
+                                Container(
+                                  padding: EdgeInsets.all(13.w),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(18.r),
+                                    border: Border.all(
+                                      color: const Color(0xFFF1F3F6),
+                                      width: 1,
+                                    ),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: const Color(0x14000000), // 8% black
+                                        offset: const Offset(0, 4),
+                                        blurRadius: 18,
+                                        spreadRadius: 0,
+                                      ),
+                                      BoxShadow(
+                                        color: const Color(0x08A3B1C6), // subtle blue shadow
+                                        offset: const Offset(0, 1),
+                                        blurRadius: 4,
+                                        spreadRadius: 0,
+                                      ),
+                                    ],
+                                  ),
+                                  child: Column(
+                                    children: [
+                                      _buildSectionLabelWithIcon(
+                                        Icons.monetization_on_outlined,
+                                        'Set your estimated budget',
+                                        textTheme,
+                                        subtitle: '(optional)',
+                                      ),
+                                      SizedBox(height: 12.h),
+                                      _buildBudgetField(postTaskProvider, textTheme),
+                                    ],
+                                  ),
+                                ),
                                 SizedBox(height: 32.h),
                                 _buildContinueButton(postTaskProvider, textTheme),
                                 SizedBox(height: 70.h),
@@ -157,7 +273,11 @@ class _PostTaskScreenState extends State<PostTaskScreen> {
   Widget _buildSectionLabel(String label, TextTheme textTheme) {
     return Text(
       label,
-      style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700, color: AppColors.authNavy),
+      style: TextStylesInApp.soraHeader(
+          color: AppColors.authNavy,
+          fontWeight: FontWeight.w600,
+          fontSize: 16.sp
+      ),
     );
   }
 
@@ -176,7 +296,11 @@ class _PostTaskScreenState extends State<PostTaskScreen> {
             SizedBox(width: 8.w),
             Text(
               label,
-              style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700, color: AppColors.authNavy),
+              style: TextStylesInApp.soraHeader(
+                  color: AppColors.authNavy,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 16.sp
+              ),
             ),
           ],
         ),
@@ -185,7 +309,11 @@ class _PostTaskScreenState extends State<PostTaskScreen> {
             padding: EdgeInsets.only(left: 28.w),
             child: Text(
               subtitle,
-              style: textTheme.bodySmall?.copyWith(color: AppColors.textGray500),
+              style:  TextStylesInApp.soraHeader(
+    color: AppColors.textGray500,
+    fontWeight: FontWeight.w400,
+    fontSize: 12.sp
+    ),
             ),
           ),
       ],
@@ -200,19 +328,35 @@ class _PostTaskScreenState extends State<PostTaskScreen> {
 
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.backgroundGray.withOpacity(0.5),
+        color: AppColors.backgroundGray,
         borderRadius: BorderRadius.circular(12.r),
-        border: Border.all(color: AppColors.borderLight),
+        //border: Border.all(color: AppColors.borderLight),
       ),
       child: DropdownButtonFormField<String>(
         value: value,
-        hint: const Text('Select a category'),
+        hint:  Text('Select a category',style: TextStylesInApp.soraHeader(
+          color: AppColors.textGray500,
+          fontWeight: FontWeight.w400,
+          fontSize: 12.sp
+        ),),
         decoration: InputDecoration(
-          border: InputBorder.none,
-          contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 4.h),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16.r),
+            borderSide: BorderSide.none,
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16.r),
+            borderSide: BorderSide.none,
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16.r),
+            borderSide: BorderSide.none,
+          ),
+          fillColor:AppColors.backgroundGray,
+          contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
           prefixIcon: Icon(Icons.grid_view_rounded, color: AppColors.authPurple, size: 20.sp),
         ),
-        icon: Icon(Icons.keyboard_arrow_down_rounded, color: AppColors.textGray500),
+        icon:provider.isLoadingCategories?CircularProgressIndicator():Icon(Icons.keyboard_arrow_down_rounded, color: AppColors.textGray500),
         items: categories.map((c) {
           return DropdownMenuItem<String>(
             value: c.id.toString(),
@@ -245,10 +389,26 @@ class _PostTaskScreenState extends State<PostTaskScreen> {
       ),
       child: DropdownButtonFormField<String>(
         value: value,
-        hint: const Text('Select a subcategory'),
+        hint:   Text('Select a subcategory',style: TextStylesInApp.soraHeader(
+            color: AppColors.textGray500,
+            fontWeight: FontWeight.w400,
+            fontSize: 12.sp
+        )),
         decoration: InputDecoration(
-          border: InputBorder.none,
-          contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 4.h),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16.r),
+            borderSide: BorderSide.none,
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16.r),
+            borderSide: BorderSide.none,
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16.r),
+            borderSide: BorderSide.none,
+          ),
+          fillColor:AppColors.backgroundGray,
+          contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
           prefixIcon: Icon(Icons.subdirectory_arrow_right_rounded, color: AppColors.authPurple, size: 20.sp),
         ),
         icon: Icon(Icons.keyboard_arrow_down_rounded, color: AppColors.textGray500),
@@ -299,101 +459,122 @@ class _PostTaskScreenState extends State<PostTaskScreen> {
   }
 
   Widget _buildPhotoSection(PostTaskProvider provider, TextTheme textTheme) {
-    return Column(
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            _buildSectionLabelWithIcon(Icons.image_outlined, 'Add Photos (Optional)', textTheme),
-            GestureDetector(
-              onTap: () => provider.pickImages(),
-              child: Text(
-                'Add Photos',
-                style: TextStyle(
-                  color: AppColors.authPurple,
-                  fontWeight: FontWeight.w700,
-                  fontSize: 12.sp,
-                ),
-              ),
-            ),
-          ],
+    return Container(
+      padding: EdgeInsets.all(13.w),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18.r),
+        border: Border.all(
+          color: const Color(0xFFF1F3F6),
+          width: 1,
         ),
-        SizedBox(height: 12.h),
-        SizedBox(
-          height: 80.h,
-          child: ListView(
-            scrollDirection: Axis.horizontal,
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0x14000000), // 8% black
+            offset: const Offset(0, 4),
+            blurRadius: 18,
+            spreadRadius: 0,
+          ),
+          BoxShadow(
+            color: const Color(0x08A3B1C6), // subtle blue shadow
+            offset: const Offset(0, 1),
+            blurRadius: 4,
+            spreadRadius: 0,
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              ...List.generate(provider.selectedPhotos.length, (index) {
-                return Container(
-                  width: 80.w,
-                  height: 80.h,
-                  margin: EdgeInsets.only(right: 12.w),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12.r),
-                    color: Colors.grey[200],
-                    image: DecorationImage(
-                      image: FileImage(File(provider.selectedPhotos[index])),
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                  child: Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      Align(
-                        alignment: Alignment.topRight,
-                        child: GestureDetector(
-                          onTap: () => provider.removePhoto(index),
-                          child: Container(
-                            margin: EdgeInsets.all(4.w),
-                            padding: EdgeInsets.all(2.w),
-                            decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
-                            child: Icon(Icons.close_rounded, size: 14.sp, color: Colors.black),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              }),
+              _buildSectionLabelWithIcon(Icons.image_outlined, 'Add Photos (Optional)', textTheme),
               GestureDetector(
                 onTap: () => provider.pickImages(),
-                child: Container(
-                  width: 80.w,
-                  height: 80.h,
-                  decoration: BoxDecoration(
-                    color: AppColors.primarySurface,
-                    borderRadius: BorderRadius.circular(12.r),
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.add_rounded, color: AppColors.authPurple, size: 24.sp),
-                      Text(
-                        'Upload\nMore',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: AppColors.authPurple,
-                          fontSize: 10.sp,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ],
-                  ),
+                child: Text(
+                  'Add Photos',
+                  style: TextStylesInApp.soraHeader(fontSize: 13.sp,fontWeight: FontWeight.w500,color: AppColors.primaryPurple),
                 ),
               ),
             ],
           ),
-        ),
-        SizedBox(height: 8.h),
-        Align(
-          alignment: Alignment.centerLeft,
-          child: Text(
-            'Add up to 5 photos to help professionals understand your task',
-            style: textTheme.labelSmall?.copyWith(color: AppColors.textGray500),
+          SizedBox(height: 12.h),
+          SizedBox(
+            height: 80.h,
+            child: ListView(
+              scrollDirection: Axis.horizontal,
+              children: [
+                ...List.generate(provider.selectedPhotos.length, (index) {
+                  return Container(
+                    width: 80.w,
+                    height: 80.h,
+                    margin: EdgeInsets.only(right: 12.w),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12.r),
+                      color: Colors.grey[200],
+                      image: DecorationImage(
+                        image: FileImage(File(provider.selectedPhotos[index])),
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                    child: Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        Align(
+                          alignment: Alignment.topRight,
+                          child: GestureDetector(
+                            onTap: () => provider.removePhoto(index),
+                            child: Container(
+                              margin: EdgeInsets.all(4.w),
+                              padding: EdgeInsets.all(2.w),
+                              decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
+                              child: Icon(Icons.close_rounded, size: 14.sp, color: Colors.black),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }),
+                GestureDetector(
+                  onTap: () => provider.pickImages(),
+                  child: Container(
+                    width: 80.w,
+                    height: 80.h,
+                    decoration: BoxDecoration(
+                      color: AppColors.primarySurface,
+                      borderRadius: BorderRadius.circular(12.r),
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.add_rounded, color: AppColors.authPurple, size: 24.sp),
+                        Text(
+                          'Upload\nMore',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: AppColors.authPurple,
+                            fontSize: 10.sp,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
-        ),
-      ],
+          SizedBox(height: 8.h),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              'Provide a detailed description of your task',
+              style: TextStylesInApp.robotoBody(fontSize: 14.sp,color: AppColors.textGray500,fontWeight: FontWeight.w400),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -421,15 +602,15 @@ class _PostTaskScreenState extends State<PostTaskScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(mainAddress, style: textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700)),
+              Text(mainAddress, style: TextStylesInApp.soraHeader(fontWeight: FontWeight.w600,color: AppColors.authNavy,fontSize: 16.sp)),
               if (detailsAddress.isNotEmpty)
                 Text(
                   detailsAddress,
-                  style: textTheme.bodySmall?.copyWith(color: AppColors.textGray500),
+                  style: TextStylesInApp.soraHeader(fontWeight: FontWeight.w400,color: AppColors.textGray500,fontSize: 14.sp),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
-              SizedBox(height: 4.h),
+              SizedBox(height: 5.h),
               GestureDetector(
                 onTap: () async {
                   final newLoc = await context.pushNamed('locationSelect');
@@ -439,11 +620,7 @@ class _PostTaskScreenState extends State<PostTaskScreen> {
                 },
                 child: Text(
                   'Change Location >',
-                  style: TextStyle(
-                    color: AppColors.authPurple,
-                    fontWeight: FontWeight.w700,
-                    fontSize: 12.sp,
-                  ),
+                  style: TextStylesInApp.soraHeader(fontWeight: FontWeight.w600,color: AppColors.primaryPurple,fontSize: 14.sp),
                 ),
               ),
             ],
@@ -468,12 +645,13 @@ class _PostTaskScreenState extends State<PostTaskScreen> {
               ),
               child: Row(
                 children: [
-                  Icon(Icons.calendar_today_outlined, size: 16.sp, color: AppColors.textGray500),
+                  Icon(Icons.calendar_month, size: 16.sp, color: AppColors.textGray500),
                   SizedBox(width: 8.w),
                   Expanded(
                     child: Text(
                       provider.formattedDate,
                       overflow: TextOverflow.ellipsis,
+                      style: TextStylesInApp.robotoBody(fontSize: 14.sp,fontWeight: FontWeight.w400,color: AppColors.textGray500),
                     ),
                   ),
                 ],
@@ -494,12 +672,13 @@ class _PostTaskScreenState extends State<PostTaskScreen> {
               ),
               child: Row(
                 children: [
-                  Icon(Icons.access_time_rounded, size: 16.sp, color: AppColors.textGray500),
+                  Icon(Icons.calendar_month, size: 16.sp, color: AppColors.textGray500),
                   SizedBox(width: 8.w),
                   Expanded(
                     child: Text(
                       provider.formattedTime(context),
                       overflow: TextOverflow.ellipsis,
+                      style: TextStylesInApp.robotoBody(fontSize: 14.sp,fontWeight: FontWeight.w400,color: AppColors.textGray500),
                     ),
                   ),
                 ],
@@ -515,7 +694,7 @@ class _PostTaskScreenState extends State<PostTaskScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Amount', style: textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w700)),
+        Text('Amount', style: TextStylesInApp.soraHeader(fontSize: 12.sp,fontWeight: FontWeight.w500,color: AppColors.authNavy)),
         SizedBox(height: 8.h),
         TextField(
           controller: _budgetController,
@@ -537,13 +716,12 @@ class _PostTaskScreenState extends State<PostTaskScreen> {
         SizedBox(height: 8.h),
         Row(
           children: [
-            Icon(Icons.info_outline_rounded, size: 14.sp, color: AppColors.textGray500),
+            Icon(Icons.info_outline_rounded, size: 25.sp, color: AppColors.textGray500),
             SizedBox(width: 8.w),
             Expanded(
               child: Text(
                 'Quotes may vary based on market rates and job requirements',
-                style: textTheme.labelSmall?.copyWith(color: AppColors.textGray500),
-              ),
+                style: TextStylesInApp.robotoBody(fontWeight: FontWeight.w400,fontSize: 14.sp,color: AppColors.textGray500)),
             ),
           ],
         ),
@@ -569,7 +747,7 @@ class _PostTaskScreenState extends State<PostTaskScreen> {
                 width: 20,
                 child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
               )
-            : const Text('Continue to Review', style: TextStyle(fontWeight: FontWeight.w700)),
+            :   Text('Continue to Review', style: TextStylesInApp.robotoBody(fontSize: 16.sp,color: Colors.white,fontWeight: FontWeight.w400)),
       ),
     );
   }
