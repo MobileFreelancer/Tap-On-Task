@@ -773,6 +773,7 @@ class _PostTaskScreenState extends State<PostTaskScreen> {
       );
     }
   }
+
 }
 
 class PostTaskSuccessScreen extends StatelessWidget {
