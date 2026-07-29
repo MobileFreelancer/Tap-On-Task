@@ -3,9 +3,11 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:tapontask/core/theme/text_styles.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/models/user_model.dart';
 import '../../../core/services/auth_service.dart';
+import '../../../core/widgets/app_header.dart';
 import '../../../core/widgets/shimmer_loading.dart';
 import '../../auth/widgets/auth_scaffold.dart';
 
@@ -33,71 +35,80 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     final user = auth.currentUser;
 
-    return AuthScaffold(
-      headerTitle: 'Profile',
-      showLogo: false,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildUserCard(user, textTheme),
-          SizedBox(height: 24.h),
-          _buildSectionTitle('Account Management', textTheme),
-          SizedBox(height: 12.h),
-          _buildMenuGroup([
-            _ProfileMenuItem(
-              icon: Icons.person_outline_rounded,
-              label: 'Edit Profile',
-              iconBg: AppColors.surfaceBlue,
-              iconColor: AppColors.accentBlue,
-              onTap: () => context.pushNamed('editProfile'),
+    return AppHeader(
+      title:'Profile' ,
+      showBackButton: false,
+      headerHeight: 120.h,
+      child: SizedBox(
+        height: double.infinity,
+        width: double.infinity,
+        child: SingleChildScrollView(
+          child: Padding(
+            padding:   EdgeInsets.symmetric(horizontal: 15.w,vertical: 30.h),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildUserCard(user, textTheme),
+                SizedBox(height: 12.h),
+                _buildSectionTitle('Account Management', textTheme),
+                SizedBox(height: 12.h),
+                _buildMenuGroup([
+                  _ProfileMenuItem(
+                    icon: Icons.person_outline_rounded,
+                    label: 'Edit Profile',
+                    iconBg: AppColors.surfaceBlue,
+                    iconColor: AppColors.accentBlue,
+                    onTap: () => context.pushNamed('editProfile'),
+                  ),
+                  _ProfileMenuItem(
+                    icon: Icons.shield_outlined,
+                    label: 'Security',
+                    iconBg: AppColors.surfaceGreen,
+                    iconColor: AppColors.accentGreen,
+                    onTap: () {},
+                  ),
+                  _ProfileMenuItem(
+                    icon: Icons.notifications_outlined,
+                    label: 'Notifications',
+                    iconBg: const Color(0xFFFFF7ED),
+                    iconColor: AppColors.accentOrange,
+                    onTap: () => context.pushNamed('notifications'),
+                  ),
+                  _ProfileMenuItem(
+                    icon: Icons.translate_rounded,
+                    label: 'Language',
+                    iconBg: AppColors.primarySurface,
+                    iconColor: AppColors.authPurple,
+                    trailing: 'English',
+                    onTap: () {},
+                  ),
+                ], textTheme),
+                SizedBox(height: 24.h),
+                _buildSectionTitle('Support & More', textTheme),
+                SizedBox(height: 12.h),
+                _buildMenuGroup([
+                  _ProfileMenuItem(
+                    icon: Icons.headset_mic_outlined,
+                    label: 'Contact Support',
+                    iconBg: AppColors.surfaceGreen,
+                    iconColor: AppColors.accentGreen,
+                    onTap: () => context.pushNamed('help'),
+                  ),
+                  _ProfileMenuItem(
+                    icon: Icons.info_outline_rounded,
+                    label: 'About Us',
+                    iconBg: const Color(0xFFFDF2F8),
+                    iconColor: const Color(0xFFEC4899),
+                    onTap: () {},
+                  ),
+                ], textTheme),
+                SizedBox(height: 24.h),
+                _buildLogoutTile(textTheme),
+                SizedBox(height: 100.h),
+              ],
             ),
-            _ProfileMenuItem(
-              icon: Icons.shield_outlined,
-              label: 'Security',
-              iconBg: AppColors.surfaceGreen,
-              iconColor: AppColors.accentGreen,
-              onTap: () {},
-            ),
-            _ProfileMenuItem(
-              icon: Icons.notifications_outlined,
-              label: 'Notifications',
-              iconBg: const Color(0xFFFFF7ED),
-              iconColor: AppColors.accentOrange,
-              onTap: () => context.pushNamed('notifications'),
-            ),
-            _ProfileMenuItem(
-              icon: Icons.translate_rounded,
-              label: 'Language',
-              iconBg: AppColors.primarySurface,
-              iconColor: AppColors.authPurple,
-              trailing: 'English',
-              onTap: () {},
-            ),
-          ], textTheme),
-          SizedBox(height: 24.h),
-          _buildSectionTitle('Support & More', textTheme),
-          SizedBox(height: 12.h),
-          _buildMenuGroup([
-            _ProfileMenuItem(
-              icon: Icons.headset_mic_outlined,
-              label: 'Contact Support',
-              iconBg: AppColors.surfaceGreen,
-              iconColor: AppColors.accentGreen,
-              onTap: () => context.pushNamed('help'),
-            ),
-            _ProfileMenuItem(
-              icon: Icons.info_outline_rounded,
-              label: 'About Us',
-              iconBg: const Color(0xFFFDF2F8),
-              iconColor: const Color(0xFFEC4899),
-              onTap: () {},
-            ),
-          ], textTheme),
-          SizedBox(height: 24.h),
-          _buildLogoutTile(textTheme),
-          SizedBox(height: 100.h),
-        ],
+          ),
+        ),
       ),
     );
   }
@@ -105,10 +116,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget _buildSectionTitle(String title, TextTheme textTheme) {
     return Text(
       title,
-      style: textTheme.titleLarge?.copyWith(
+      style: TextStylesInApp.robotoBody(
         fontWeight: FontWeight.w700,
         color: AppColors.authNavy,
-        fontSize: 16.sp,
+        fontSize: 18.sp,
       ),
     );
   }
@@ -119,7 +130,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         : 'May 25, 2025';
 
     return Container(
-      padding: EdgeInsets.all(16.w),
+      padding: EdgeInsets.all(10.w),
       decoration: BoxDecoration(
         color: AppColors.backgroundGray,
         border: Border.all(color: AppColors.black.withValues(alpha: 0.03)),
@@ -169,37 +180,39 @@ class _ProfileScreenState extends State<ProfileScreen> {
               children: [
                 Text(
                   user?.name ?? 'James Anderson',
-                  style: textTheme.titleLarge?.copyWith(
+                  style: TextStylesInApp.robotoBody(
                     fontWeight: FontWeight.w700,
                     color: AppColors.authNavy,
-                    fontSize: 16.sp,
+                    fontSize: 18.sp,
                   ),
                 ),
                 SizedBox(height: 4.h),
                 Text(
                   user?.phoneNumber ?? '+1 (647) 123-4567',
-                  style: textTheme.bodySmall?.copyWith(
+                  style: TextStylesInApp.robotoBody(
+                    fontWeight: FontWeight.w400,
                     color: AppColors.textGray500,
-                    fontSize: 12.sp,
+                    fontSize: 15.sp,
                   ),
                 ),
                 Text(
                   user?.email ?? 'jamesander18@gmail.com',
-                  style: textTheme.bodySmall?.copyWith(
+                  style: TextStylesInApp.robotoBody(
                     color: AppColors.textGray500,
-                    fontSize: 12.sp,
+                    fontWeight: FontWeight.w400,
+                    fontSize: 15.sp,
                   ),
                 ),
-                SizedBox(height: 4.h),
                 Row(
                   children: [
-                    Icon(Icons.calendar_today_outlined, size: 12.sp, color: AppColors.textGray400),
+                    Icon(Icons.calendar_month, size: 12.sp, color: AppColors.textGray400),
                     SizedBox(width: 4.w),
                     Text(
-                      'Joined Date $joinedDate',
-                      style: textTheme.bodySmall?.copyWith(
+                      joinedDate,
+                      style: TextStylesInApp.robotoBody(
                         color: AppColors.textGray400,
-                        fontSize: 11.sp,
+                        fontWeight: FontWeight.w400,
+                        fontSize: 15.sp,
                       ),
                     ),
                   ],
@@ -239,9 +252,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
                 title: Text(
                   item.label,
-                  style: textTheme.bodyMedium?.copyWith(
+                  style: TextStylesInApp.robotoBody(
                     fontWeight: FontWeight.w500,
                     fontSize: 14.sp,
+                    color: AppColors.authNavy
                   ),
                 ),
                 trailing: Row(
@@ -255,7 +269,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           fontSize: 12.sp,
                         ),
                       ),
-                    Icon(Icons.chevron_right_rounded, color: AppColors.textGray400, size: 20.sp),
+                    Icon(Icons.chevron_right_rounded, color: AppColors.authNavy, size: 25.sp),
                   ],
                 ),
               ),

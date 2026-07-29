@@ -1441,67 +1441,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   }
 }
 
-class HelpSupportScreen extends StatefulWidget {
-  const HelpSupportScreen({super.key});
 
-  @override
-  State<HelpSupportScreen> createState() => _HelpSupportScreenState();
-}
-
-class _HelpSupportScreenState extends State<HelpSupportScreen> {
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<NotificationService>().fetchFaqs();
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final faqs = context.watch<NotificationService>().faqs;
-    final categories = faqs.map((f) => f.category).toSet().toList();
-
-    return Scaffold(
-      backgroundColor: AppColors.backgroundOffWhite,
-      appBar: AppBar(title: const Text('Help & Support')),
-      body: ListView(
-        padding: const EdgeInsets.all(20),
-        children: [
-          TextField(
-            decoration: InputDecoration(
-              hintText: 'Search for help...',
-              prefixIcon: const Icon(Icons.search_rounded),
-              filled: true,
-              fillColor: AppColors.backgroundWhite,
-            ),
-          ),
-          const SizedBox(height: 24),
-          ...categories.map((cat) {
-            final catFaqs = faqs.where((f) => f.category == cat).toList();
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(cat, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-                const SizedBox(height: 8),
-                ...catFaqs.map((faq) => ExpansionTile(
-                  title: Text(faq.question, style: const TextStyle(fontSize: 14)),
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                      child: Text(faq.answer, style: const TextStyle(fontSize: 13, color: AppColors.textGray600, height: 1.5)),
-                    ),
-                  ],
-                )),
-                const SizedBox(height: 16),
-              ],
-            );
-          }),
-        ],
-      ),
-    );
-  }
-}
 
 class MessagesScreen extends StatelessWidget {
   const MessagesScreen({super.key});

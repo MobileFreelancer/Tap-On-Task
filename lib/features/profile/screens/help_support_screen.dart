@@ -74,7 +74,7 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
                       Row(
                         children: [
                           Expanded(
-                            child: Center(
+                            child: IntrinsicHeight(
                               child: _buildContactCard(
                                 icon: Icons.chat_bubble_outline_rounded,
                                 iconColor: Colors.blue,
@@ -88,13 +88,15 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
                           ),
                           SizedBox(width: 16.w),
                           Expanded(
-                            child: _buildContactCard(
-                              icon: Icons.email_outlined,
-                              iconColor: AppColors.primaryPurple,
-                              title: 'Email Us',
-                              subtitle: 'We\'ll reply\nwithin 24 hours',
-                              buttonText: 'Send Email',
-                              onPressed: () {},
+                            child: IntrinsicHeight(
+                              child: _buildContactCard(
+                                icon: Icons.email_outlined,
+                                iconColor: AppColors.primaryPurple,
+                                title: 'Email Us',
+                                subtitle: 'We\'ll reply\nwithin 24 hours',
+                                buttonText: 'Send Email',
+                                onPressed: () {},
+                              ),
                             ),
                           ),
                         ],
@@ -261,6 +263,7 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
     required VoidCallback onPressed,
   }) {
     return Container(
+      height: 205.h,
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
         color: AppColors.textGrayF9,
