@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:tapontask/core/theme/text_styles.dart';
@@ -356,11 +357,26 @@ class _PostTaskScreenState extends State<PostTaskScreen> {
           contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
           prefixIcon: Icon(Icons.grid_view_rounded, color: AppColors.authPurple, size: 20.sp),
         ),
-        icon:provider.isLoadingCategories?CircularProgressIndicator():Icon(Icons.keyboard_arrow_down_rounded, color: AppColors.textGray500),
+        icon:provider.isLoadingCategories?SizedBox(height: 20.h,width: 20.w,child: CircularProgressIndicator()):Icon(Icons.keyboard_arrow_down_rounded, color: AppColors.textGray500),
         items: categories.map((c) {
           return DropdownMenuItem<String>(
             value: c.id.toString(),
-            child: Text(c.name),
+            child: Row(
+              spacing: 5.w,
+              children: [
+                SvgPicture.network(
+                  c.iconPath.toString(),
+                  fit: BoxFit.cover,
+                  placeholderBuilder: (context) => const Center(
+                    child: CircularProgressIndicator(),
+                  ),
+                  errorBuilder: (context, error, stackTrace) {
+                    return Icon(Icons.error, color: AppColors.authPurple, size: 20.sp);
+                  },
+                ),
+                Text(c.name,style: TextStylesInApp.robotoBody(color: AppColors.authNavy,fontSize: 13.sp,fontWeight: FontWeight.w400),),
+              ],
+            ),
           );
         }).toList(),
         onChanged: (val) {
@@ -374,8 +390,7 @@ class _PostTaskScreenState extends State<PostTaskScreen> {
 
   Widget _buildSubcategoryDropdown(PostTaskProvider provider) {
     final subcategories = provider.categories
-        .firstWhere((c) => c.id.toString() == provider.selectedCategoryId)
-        .subcategories;
+        .firstWhere((c) => c.id.toString() == provider.selectedCategoryId).subcategories;
 
     String? value = subcategories.any((s) => s.id.toString() == provider.selectedSubcategoryId)
         ? provider.selectedSubcategoryId
@@ -415,7 +430,21 @@ class _PostTaskScreenState extends State<PostTaskScreen> {
         items: subcategories.map((s) {
           return DropdownMenuItem<String>(
             value: s.id.toString(),
-            child: Text(s.name),
+            child: Row(
+              spacing: 10.w,
+              children: [
+                Image.network(
+                  s.imagePath.toString(),
+                  fit: BoxFit.cover,
+                  height: 25.h,
+                  width: 25.w,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Icon(Icons.error, color: AppColors.authPurple, size: 20.sp);
+                  },
+                ),
+                Text(s.name,style: TextStylesInApp.robotoBody(color: AppColors.authNavy,fontSize: 13.sp,fontWeight: FontWeight.w400),),
+              ],
+            ),
           );
         }).toList(),
         onChanged: (val) {

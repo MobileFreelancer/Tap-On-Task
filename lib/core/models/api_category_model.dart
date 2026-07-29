@@ -3,16 +3,19 @@ class CategoryResponseModel {
   final String message;
   final CategoryData data;
 
+
   CategoryResponseModel({
     required this.status,
     required this.message,
     required this.data,
+
   });
 
   factory CategoryResponseModel.fromJson(Map<String, dynamic> json) {
     return CategoryResponseModel(
       status: json['status'] ?? '',
       message: json['message'] ?? '',
+
       data: CategoryData.fromJson(json['data'] ?? {}),
     );
   }
@@ -36,12 +39,14 @@ class ApiCategory {
   final int id;
   final String name;
   final String slug;
+  final String? iconPath;
   final List<ApiSubcategory> subcategories;
 
   ApiCategory({
     required this.id,
     required this.name,
     required this.slug,
+    required this.iconPath,
     required this.subcategories,
   });
 
@@ -50,6 +55,7 @@ class ApiCategory {
       id: json['id'] ?? 0,
       name: json['name'] ?? '',
       slug: json['slug'] ?? '',
+      iconPath: json['icon_path'] ?? '',
       subcategories: (json['subcategories'] as List? ?? [])
           .map((e) => ApiSubcategory.fromJson(e))
           .toList(),
@@ -61,11 +67,13 @@ class ApiSubcategory {
   final int id;
   final String name;
   final String slug;
+  final String? imagePath;
 
   ApiSubcategory({
     required this.id,
     required this.name,
     required this.slug,
+    this.imagePath,
   });
 
   factory ApiSubcategory.fromJson(Map<String, dynamic> json) {
@@ -73,6 +81,7 @@ class ApiSubcategory {
       id: json['id'] ?? 0,
       name: json['name'] ?? '',
       slug: json['slug'] ?? '',
+      imagePath: json["image_path"],
     );
   }
 }
