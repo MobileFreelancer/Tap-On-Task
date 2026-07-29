@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:tapontask/core/theme/text_styles.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/models/booking_model.dart';
 import '../../../core/models/api_job_model.dart';
@@ -11,6 +12,7 @@ import '../../../core/services/app_services.dart';
 import '../../../core/services/auth_service.dart';
 import '../../../core/widgets/app_gradient_header.dart';
 import '../../../core/widgets/shimmer_loading.dart';
+import '../../../generated/assets.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -36,147 +38,166 @@ class _HomeScreenState extends State<HomeScreen> {
     final userName = auth.currentUser?.name?.split(' ').first ?? 'User';
 
     return Scaffold(
-      backgroundColor: AppColors.backgroundWhite,
-      body: homeService.isLoading
-          ? const _HomeShimmer()
-          : RefreshIndicator(
-              onRefresh: () => homeService.fetchHomeData(),
-              child: CustomScrollView(
-                slivers: [
-                  SliverToBoxAdapter(
-                    child: AppGradientHeader(
-                      height: 200,
-                      child: Padding(
-                        padding: EdgeInsets.fromLTRB(20.w, 0, 20.w, 24.h),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        'Hi, $userName',
-                                        style: textTheme.headlineSmall?.copyWith(
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.w700,
-                                          fontSize: 22.sp,
-                                        ),
-                                      ),
-                                      SizedBox(height: 4.h),
-                                      Text(
-                                        'How can we help you today?',
-                                        style: textTheme.bodyMedium?.copyWith(
-                                          color: Colors.white.withOpacity(0.85),
-                                          fontSize: 14.sp,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                _HeaderIconButton(
-                                  icon: Icons.notifications_outlined,
-                                  onTap: () => context.pushNamed('notifications'),
-                                ),
-                                SizedBox(width: 8.w),
-                                _HeaderIconButton(
-                                  icon: Icons.person_outline_rounded,
-                                  onTap: () => context.go('/profile'),
-                                ),
-                              ],
-                            ),
-                            SizedBox(height: 16.h),
-                            _buildSearchBar(textTheme),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                  SliverToBoxAdapter(
-                    child: Transform.translate(
-                      offset: Offset(0, -20.h),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: AppColors.backgroundWhite,
-                          borderRadius: BorderRadius.vertical(top: Radius.circular(30.r)),
-                        ),
-                        child: Padding(
-                          padding: EdgeInsets.fromLTRB(16.w, 24.h, 16.w, 0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              SizedBox(height: 14.h),
-                              _buildPromoBanner(textTheme),
-                              SizedBox(height: 24.h),
-                              _buildSectionHeader('Recent Searches', textTheme),
-                              SizedBox(height: 12.h),
-                              _buildRecentSearches(textTheme),
-                              SizedBox(height: 24.h),
-                              _buildSectionHeader('Popular Category', textTheme, onViewAll: () => context.pushNamed('categories')),
-                              SizedBox(height: 12.h),
-                              _buildPopularCategories(homeService, textTheme),
-                              SizedBox(height: 24.h),
-                              _buildSectionHeader('Nearby Professionals', textTheme),
-                              SizedBox(height: 12.h),
-                              _buildNearbyProfessionals(homeService, textTheme),
-                              SizedBox(height: 24.h),
-                              _buildSectionHeader('Quick Services', textTheme, onViewAll: () => context.pushNamed('categories')),
-                              SizedBox(height: 12.h),
-                              _buildQuickServices(homeService, textTheme),
-                              SizedBox(height: 24.h),
-                              _buildSectionHeader('Active job', textTheme, onViewAll: () => context.pushNamed('myTasks')),
-                              SizedBox(height: 12.h),
-                              if (homeService.recentBookings.isNotEmpty)
-                                _buildJobCard(homeService.recentBookings.first, textTheme, isActive: true),
-                              SizedBox(height: 24.h),
-                              _buildSectionHeader('Upcoming Job', textTheme, onViewAll: () => context.pushNamed('myTasks')),
-                              SizedBox(height: 12.h),
-                              if (homeService.apiJobs.isEmpty)
-                                Center(
-                                  child: Padding(
-                                    padding: EdgeInsets.symmetric(vertical: 20.h),
-                                    child: Text(
-                                      'No upcoming jobs found',
-                                      style: textTheme.bodyMedium?.copyWith(color: AppColors.textGray400),
-                                    ),
-                                  ),
-                                )
-                              else
-                                ...homeService.apiJobs.take(3).map(
-                                      (job) => Padding(
-                                        padding: EdgeInsets.only(bottom: 10.h),
-                                        child: _buildApiJobCard(job, textTheme),
-                                      ),
-                                    ),
-                              if (homeService.apiJobs.length > 3)
-                                Center(
-                                  child: TextButton(
-                                    onPressed: () => context.pushNamed('myTasks'),
-                                    child: Text(
-                                      'See More',
-                                      style: textTheme.labelLarge?.copyWith(
-                                        color: AppColors.authPurple,
-                                        fontSize: 14.sp,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              SizedBox(height: 100.h),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => context.goNamed('postTask'),
         backgroundColor: AppColors.authPurple,
         child: const Icon(Icons.add_rounded, color: Colors.white, size: 30),
+      ),
+      body: Stack(
+        children: [
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: Image.asset(
+              AppAssets.appHeader,
+              width: double.infinity,
+              fit: BoxFit.cover,
+            ),
+          ),
+          Positioned.fill(
+            top: 180.h,
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(20.r),
+                  topRight: Radius.circular(20.r),
+                ),
+              ),
+              child: homeService.isLoading
+                  ? const _HomeShimmer()
+                  : RefreshIndicator(
+                onRefresh: () => homeService.fetchHomeData(),
+                child: SingleChildScrollView(
+                  padding: EdgeInsets.zero,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: AppColors.backgroundWhite,
+                      borderRadius: BorderRadius.vertical(top: Radius.circular(30.r)),
+                    ),
+                    child: Padding(
+                      padding: EdgeInsets.fromLTRB(16.w, 5.h, 16.w, 0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          SizedBox(height: 14.h),
+                          _buildPromoBanner(textTheme),
+                          //SizedBox(height: 24.h),
+                          //_buildSectionHeader('Recent Searches', textTheme),
+                          // SizedBox(height: 12.h),
+                           //_buildRecentSearches(textTheme),
+                          SizedBox(height: 24.h),
+                          _buildSectionHeader('Popular Category', textTheme, onViewAll: () => context.pushNamed('categories')),
+                          SizedBox(height: 12.h),
+                          _buildPopularCategories(homeService, textTheme),
+                          SizedBox(height: 24.h),
+                          _buildSectionHeader('Nearby Professionals', textTheme),
+                          SizedBox(height: 12.h),
+                          _buildNearbyProfessionals(homeService, textTheme),
+                          SizedBox(height: 24.h),
+                          _buildSectionHeader('Quick Services', textTheme, onViewAll: () => context.pushNamed('categories')),
+                          SizedBox(height: 12.h),
+                          _buildQuickServices(homeService, textTheme),
+                          SizedBox(height: 24.h),
+                          _buildSectionHeader('Active job', textTheme, onViewAll: () => context.pushNamed('myTasks')),
+                          SizedBox(height: 12.h),
+                          if (homeService.recentBookings.isNotEmpty)
+                            _buildJobCard(homeService.recentBookings.first, textTheme, isActive: true),
+                          SizedBox(height: 24.h),
+                          _buildSectionHeader('Upcoming Job', textTheme, onViewAll: () => context.pushNamed('myTasks')),
+                          SizedBox(height: 12.h),
+                          if (homeService.apiJobs.isEmpty)
+                            Center(
+                              child: Padding(
+                                padding: EdgeInsets.symmetric(vertical: 20.h),
+                                child: Text(
+                                  'No upcoming jobs found',
+                                  style: textTheme.bodyMedium?.copyWith(color: AppColors.textGray400),
+                                ),
+                              ),
+                            )
+                          else
+                            ...homeService.apiJobs.take(3).map(
+                                  (job) => Padding(
+                                padding: EdgeInsets.only(bottom: 10.h),
+                                child: _buildApiJobCard(job, textTheme),
+                              ),
+                            ),
+                          if (homeService.apiJobs.length > 3)
+                            Center(
+                              child: TextButton(
+                                onPressed: () => context.pushNamed('myTasks'),
+                                child: Text(
+                                  'See More',
+                                  style: textTheme.labelLarge?.copyWith(
+                                    color: AppColors.authPurple,
+                                    fontSize: 14.sp,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          SizedBox(height: 100.h),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+
+            ),
+          ),
+          Positioned(
+            top: 45.h,
+            left: 16.w,
+            right: 16.w,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Hi, $userName',
+                              style: TextStylesInApp.robotoBody(fontWeight: FontWeight.w700,color: Colors.white,fontSize: 18.sp),
+                            ),
+                            SizedBox(height: 4.h),
+                            Text(
+                              'How can we help you today?',
+                              style: TextStylesInApp.robotoBody(fontWeight: FontWeight.w400,color: Colors.white,fontSize: 14.sp),
+                            ),
+                          ],
+                        ),
+                        Row(
+                          children: [
+                            _HeaderIconButton(
+                              icon: Icons.notifications_outlined,
+                              onTap: () => context.pushNamed('notifications'),
+                            ),
+                            SizedBox(width: 8.w),
+                            _HeaderIconButton(
+                              icon: Icons.person_outline_rounded,
+                              onTap: () => context.go('/profile'),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 16.h),
+                    _buildSearchBar(textTheme),
+                  ],
+                ),
+                SizedBox(height: 10,)
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -185,7 +206,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return GestureDetector(
       onTap: () => context.pushNamed('search'),
       child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 4.h),
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(14.r),
@@ -204,8 +225,8 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
             Container(
-              width: 40.w,
-              height: 40.w,
+              width: 30.w,
+              height: 30.w,
               decoration: BoxDecoration(
                 color: AppColors.authPurple,
                 borderRadius: BorderRadius.circular(10.r),
@@ -222,11 +243,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return Container(
       height: 130.h,
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFF5B21B6), Color(0xFF7D30FF)],
-          begin: Alignment.centerLeft,
-          end: Alignment.centerRight,
-        ),
+        image: DecorationImage(image: AssetImage("assets/images/team.png"),fit: BoxFit.cover),
         borderRadius: BorderRadius.circular(16.r),
       ),
       padding: EdgeInsets.all(16.w),
@@ -240,7 +257,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 Container(
                   padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
+                    color: AppColors.primaryPurple,
                     borderRadius: BorderRadius.circular(6.r),
                   ),
                   child: Text(
@@ -253,21 +270,13 @@ class _HomeScreenState extends State<HomeScreen> {
                   onTap: () => context.pushNamed('jobConfirmation'),
                   child: Text(
                     'with Home Services?',
-                    style: textTheme.titleMedium?.copyWith(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 16.sp,
-                      decoration: TextDecoration.underline,
-                    ),
+                    style: TextStylesInApp.soraHeader(fontWeight: FontWeight.w600,color: Colors.white,fontSize: 16.sp),
                   ),
                 ),
                 SizedBox(height: 4.h),
                 Text(
-                  'Trusted professionals at your service',
-                  style: textTheme.bodySmall?.copyWith(
-                    color: Colors.white.withOpacity(0.8),
-                    fontSize: 12.sp,
-                  ),
+                  'Trusted professionals\nat your service',
+                  style: TextStylesInApp.robotoBody(fontWeight: FontWeight.w400,color: Colors.white,fontSize: 16.sp),
                 ),
               ],
             ),
@@ -316,21 +325,14 @@ class _HomeScreenState extends State<HomeScreen> {
       children: [
         Text(
           title,
-          style: textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.w700,
-            fontSize: 16.sp,
-            color: AppColors.authNavy,
-          ),
+          style: TextStylesInApp.soraHeader(fontSize: 17.sp,fontWeight: FontWeight.w600,color: AppColors.authNavy),
         ),
         if (onViewAll != null)
           GestureDetector(
             onTap: onViewAll,
             child: Text(
               'View All',
-              style: textTheme.labelLarge?.copyWith(
-                color: AppColors.authNavy,
-                fontSize: 13.sp,
-              ),
+              style: TextStylesInApp.soraHeader(fontSize: 14.sp,fontWeight: FontWeight.w500,color: AppColors.authNavy),
             ),
           ),
       ],
@@ -361,10 +363,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   SizedBox(height: 8.h),
                   Text(
                     cat.name,
-                    style: textTheme.bodySmall?.copyWith(
-                      fontWeight: FontWeight.w500,
-                      fontSize: 11.sp,
-                    ),
+                    style: TextStylesInApp.soraHeader(fontWeight: FontWeight.w600,color: AppColors.authNavy,fontSize: 14.sp),
                     textAlign: TextAlign.center,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -417,18 +416,11 @@ class _HomeScreenState extends State<HomeScreen> {
                     children: [
                       Text(
                         provider.name,
-                        style: textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                          fontSize: 14.sp,
-                          color: AppColors.authNavy
-                        ),
+                        style:TextStylesInApp.soraHeader(color: AppColors.authNavy,fontWeight: FontWeight.w600,fontSize: 16.sp),
                       ),
                       Text(
                         provider.title,
-                        style: textTheme.bodySmall?.copyWith(
-                          color: AppColors.textGray500,
-                          fontSize: 12.sp,
-                        ),
+                        style: TextStylesInApp.robotoBody(color: AppColors.textGray500,fontWeight: FontWeight.w400,fontSize: 14.sp),
                       ),
                       Row(
                         children: [
@@ -437,10 +429,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           SizedBox(width: 8.w),
                           Text(
                             '${(provider.distanceKm ?? 0).toStringAsFixed(0)} km away',
-                            style: textTheme.bodySmall?.copyWith(
-                              color: AppColors.textGray400,
-                              fontSize: 11.sp,
-                            ),
+                            style: TextStylesInApp.robotoBody(color: AppColors.textGray500,fontWeight: FontWeight.w400,fontSize: 12.sp),
                           ),
                         ],
                       ),
@@ -534,10 +523,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       children: [
                         Text(
                           service.title,
-                          style: textTheme.bodySmall?.copyWith(
-                            fontWeight: FontWeight.w600,
-                            fontSize: 12.sp,
-                          ),
+                          style: TextStylesInApp.robotoBody(color: AppColors.authNavy,fontWeight: FontWeight.w600,fontSize: 13.sp),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -555,10 +541,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             SizedBox(width: 4.w),
                             Text(
                               'Available Now',
-                              style: textTheme.labelSmall?.copyWith(
-                                color: AppColors.accentGreen,
-                                fontSize: 10.sp,
-                              ),
+                              style: TextStylesInApp.robotoBody(color: AppColors.textGray500,fontWeight: FontWeight.w400,fontSize: 12.sp),
                             ),
                           ],
                         ),
@@ -608,17 +591,11 @@ class _HomeScreenState extends State<HomeScreen> {
               children: [
                 Text(
                   booking.providerName ?? booking.title,
-                  style: textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 14.sp,
-                  ),
+                  style: TextStylesInApp.robotoBody(color: AppColors.authNavy,fontWeight: FontWeight.w600,fontSize: 16.sp),
                 ),
                 Text(
                   booking.categoryName ?? 'Service',
-                  style: textTheme.bodySmall?.copyWith(
-                    color: AppColors.textGray500,
-                    fontSize: 12.sp,
-                  ),
+                  style: TextStylesInApp.robotoBody(color: AppColors.textGray500,fontWeight: FontWeight.w400,fontSize: 13.sp),
                 ),
               ],
             ),
@@ -628,17 +605,11 @@ class _HomeScreenState extends State<HomeScreen> {
             children: [
               Text(
                 dayFormat.format(booking.scheduledAt),
-                style: textTheme.bodySmall?.copyWith(
-                  fontWeight: FontWeight.w500,
-                  fontSize: 12.sp,
-                ),
+                style: TextStylesInApp.robotoBody(color: AppColors.textGray500,fontWeight: FontWeight.w400,fontSize: 13.sp),
               ),
               Text(
                 dateFormat.format(booking.scheduledAt),
-                style: textTheme.labelSmall?.copyWith(
-                  color: AppColors.textGray400,
-                  fontSize: 10.sp,
-                ),
+                style: TextStylesInApp.robotoBody(color: AppColors.textGray500,fontWeight: FontWeight.w400,fontSize: 13.sp),
               ),
             ],
           ),
@@ -771,7 +742,7 @@ class _HeaderIconButton extends StatelessWidget {
           color: Colors.white,
           shape: BoxShape.circle,
         ),
-        child: Icon(icon, color: AppColors.authPurple, size: 20.sp),
+        child: Icon(icon, color: AppColors.black, size: 20.sp),
       ),
     );
   }

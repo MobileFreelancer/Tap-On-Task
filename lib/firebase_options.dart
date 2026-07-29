@@ -65,6 +65,6 @@ class DefaultFirebaseOptions {
     storageBucket: 'tapontask.firebasestorage.app',
     androidClientId: '1012244723831-9doungfk2jv7f5ltb0vgegghevh96ge1.apps.googleusercontent.com',
     iosClientId: '1012244723831-6013kmbaic235gsngu9simou68j5161a.apps.googleusercontent.com',
-    iosBundleId: 'com.tapontask.app',
+    iosBundleId: 'com.app.tapontask',
   );
 }
