@@ -7,6 +7,7 @@ import '../models/task_model.dart';
 import '../models/api_job_model.dart';
 import 'api_service.dart';
 import 'app_mock_data.dart';
+import 'stripe_payment_service.dart';
 
 class HomeService extends ChangeNotifier {
   static final HomeService _instance = HomeService._internal();
@@ -306,26 +307,33 @@ class PaymentService extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<bool> processPayment({
+  Map<String, dynamic>? _lastPaymentResponse;
+  Map<String, dynamic>? get lastPaymentResponse => _lastPaymentResponse;
+
+  Future<StripePaymentOutcome> processPayment({
     required double amount,
     required String bookingId,
+    String currency = 'cad',
   }) async {
     _isLoading = true;
     _error = null;
+    _lastPaymentResponse = null;
     notifyListeners();
 
-    try {
-      // Force mock
-      await Future.delayed(const Duration(seconds: 2));
-      _isLoading = false;
-      notifyListeners();
-      return true;
-    } catch (_) {
-      _error = 'Payment failed.';
-      _isLoading = false;
-      notifyListeners();
-      return false;
+    final outcome = await StripePaymentService.instance.pay(
+      amount: amount,
+      bookingId: bookingId,
+      currency: currency,
+    );
+
+    _lastPaymentResponse = outcome.paymentResponse;
+    if (!outcome.isSuccess) {
+      _error = outcome.message;
     }
+
+    _isLoading = false;
+    notifyListeners();
+    return outcome;
   }
 }
 

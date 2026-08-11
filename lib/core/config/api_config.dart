@@ -47,6 +47,20 @@ class ApiConfig {
   static const Duration connectTimeout = Duration(seconds: 40);
   static const Duration receiveTimeout = Duration(seconds: 40);
 
+  static String get stripePublishableKey {
+    const dartDefine = String.fromEnvironment('STRIPE_PUBLISHABLE_KEY');
+    if (dartDefine.isNotEmpty) return dartDefine;
+    return dotenv.env['STRIPE_PUBLISHABLE_KEY'] ?? '';
+  }
+
+  /// Temporary client-side secret for PaymentIntent creation until backend
+  /// exposes a create-intent endpoint. Do not ship production builds with this.
+  static String get stripeSecretKey {
+    const dartDefine = String.fromEnvironment('STRIPE_SECRET_KEY');
+    if (dartDefine.isNotEmpty) return dartDefine;
+    return dotenv.env['STRIPE_SECRET_KEY'] ?? '';
+  }
+
   static const String storageKeyAccessToken = 'access_token';
   static const String storageKeyRefreshToken = 'refresh_token';
   static const String storageKeyUserID = 'user_id';

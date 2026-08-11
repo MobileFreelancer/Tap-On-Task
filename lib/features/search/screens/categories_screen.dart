@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../../core/constants/app_colors.dart';
@@ -15,6 +16,7 @@ class CategoriesScreen extends StatefulWidget {
 }
 
 class _CategoriesScreenState extends State<CategoriesScreen> {
+
   @override
   void initState() {
     super.initState();
@@ -165,31 +167,7 @@ class _CategoryGridItem extends StatelessWidget {
     required this.onTap,
   });
 
-  IconData _getIconForCategory(String slug) {
-    switch (slug.toLowerCase()) {
-      case 'cleaning':
-        return Icons.cleaning_services_rounded;
-      case 'repairs':
-      case 'plumbing':
-        return Icons.build_rounded;
-      case 'moving':
-        return Icons.local_shipping_rounded;
-      case 'delivery':
-        return Icons.delivery_dining_rounded;
-      case 'shopping':
-        return Icons.shopping_bag_rounded;
-      case 'tutoring':
-        return Icons.school_rounded;
-      case 'events':
-        return Icons.celebration_rounded;
-      case 'electrician':
-        return Icons.electric_bolt_rounded;
-      case 'painting':
-        return Icons.format_paint_rounded;
-      default:
-        return Icons.category_rounded;
-    }
-  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -216,14 +194,19 @@ class _CategoryGridItem extends StatelessWidget {
           children: [
             Container(
               padding: EdgeInsets.all(10.w),
-              decoration: BoxDecoration(
-                color: AppColors.primarySurface,
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                _getIconForCategory(category.slug),
-                color: AppColors.authPurple,
-                size: 24.sp,
+              // decoration: BoxDecoration(
+              //   color: AppColors.primarySurface,
+              //   shape: BoxShape.circle,
+              // ),
+              child: SvgPicture.network(
+                category.iconPath.toString(),
+                fit: BoxFit.cover,
+                placeholderBuilder: (context) => const Center(
+                  child: CircularProgressIndicator(),
+                ),
+                errorBuilder: (context, error, stackTrace) {
+                  return Icon(Icons.error, color: AppColors.authPurple, size: 20.sp);
+                },
               ),
             ),
             SizedBox(height: 8.h),

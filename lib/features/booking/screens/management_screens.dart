@@ -7,6 +7,7 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/models/booking_model.dart';
 import '../../../core/models/task_model.dart';
 import '../../../core/services/app_services.dart';
+import '../../../core/services/stripe_payment_service.dart';
 import '../../../core/theme/text_styles.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/widgets/app_gradient_header.dart';
@@ -514,6 +515,38 @@ class PaymentScreen extends StatefulWidget {
 
 class _PaymentScreenState extends State<PaymentScreen> {
   String _selectedMethod = 'visa';
+  bool _isPaying = false;
+
+  Future<void> _onPayPressed(double totalAmount) async {
+    if (_isPaying) return;
+
+    setState(() => _isPaying = true);
+
+    final outcome = await context.read<PaymentService>().processPayment(
+          amount: totalAmount,
+          bookingId: widget.bookingId,
+          currency: 'cad',
+        );
+
+    if (!mounted) return;
+    setState(() => _isPaying = false);
+
+    switch (outcome.status) {
+      case StripePaymentStatus.success:
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Payment successful!')),
+        );
+        context.go('/customer/dashboard');
+      case StripePaymentStatus.cancelled:
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Payment cancelled')),
+        );
+      case StripePaymentStatus.failed:
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(outcome.message)),
+        );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -1224,27 +1257,32 @@ class _PaymentScreenState extends State<PaymentScreen> {
       width: double.infinity,
       height: 48.h,
       child: ElevatedButton(
-        onPressed: () {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Payment successful!')),
-          );
-          context.go('/customer/dashboard');
-        },
+        onPressed: _isPaying ? null : () => _onPayPressed(totalAmount),
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primaryPurple,
+          disabledBackgroundColor: AppColors.primaryPurple.withOpacity(0.6),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10.r),
           ),
           elevation: 0,
         ),
-        child: Text(
-          "Pay CAD ${totalAmount.toStringAsFixed(2)}",
-          style: TextStylesInApp.robotoBody(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-            fontSize: 16.sp,
-          ),
-        ),
+        child: _isPaying
+            ? SizedBox(
+                width: 22.w,
+                height: 22.w,
+                child: const CircularProgressIndicator(
+                  strokeWidth: 2.5,
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                ),
+              )
+            : Text(
+                "Pay CAD ${totalAmount.toStringAsFixed(2)}",
+                style: TextStylesInApp.robotoBody(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16.sp,
+                ),
+              ),
       ),
     );
   }
