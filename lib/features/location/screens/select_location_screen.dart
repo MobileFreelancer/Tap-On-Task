@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:google_places_flutter/google_places_flutter.dart';
+import 'package:google_places_flutter/model/prediction.dart';
 import 'package:provider/provider.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/widgets/app_gradient_header.dart';
@@ -15,11 +18,17 @@ class SelectLocationScreen extends StatefulWidget {
 
 class _SelectLocationScreenState extends State<SelectLocationScreen> {
   final TextEditingController _searchController = TextEditingController();
+  GoogleMapController? _mapController;
 
   @override
   void dispose() {
     _searchController.dispose();
+    _mapController?.dispose();
     super.dispose();
+  }
+
+  void _onMapCreated(GoogleMapController controller) {
+    _mapController = controller;
   }
 
   @override
@@ -74,23 +83,15 @@ class _SelectLocationScreenState extends State<SelectLocationScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _buildSearchBar(textTheme, locationProvider),
+                      _buildSearchBar(locationProvider),
                       SizedBox(height: 20.h),
-                      _buildMapSection(textTheme),
+                      _buildMapSection(locationProvider),
                       SizedBox(height: 24.h),
                       _buildAddressRow(textTheme, locationProvider),
                       SizedBox(height: 16.h),
                       _buildCurrentLocationToggle(textTheme, locationProvider),
-                      SizedBox(height: 24.h),
-                      Text(
-                        'Saved Locations',
-                        style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
-                      ),
-                      SizedBox(height: 12.h),
-                      _buildSavedLocationItem(Icons.home_rounded, 'Home', '123 Maple street, toronto, ON, Canada', true),
-                      _buildSavedLocationItem(Icons.work_rounded, 'Work', '45 king street west, Toronto, ON M5H 1A1', false),
                       SizedBox(height: 32.h),
-                      _buildConfirmButton(textTheme, locationProvider),
+                      _buildConfirmButton(locationProvider),
                     ],
                   ),
                 ),
@@ -102,83 +103,103 @@ class _SelectLocationScreenState extends State<SelectLocationScreen> {
     );
   }
 
-  Widget _buildSearchBar(TextTheme textTheme, LocationProvider locationProvider) {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 4.h),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12.r),
-        border: Border.all(color: AppColors.borderLight),
+  Widget _buildSearchBar(LocationProvider provider) {
+    return GooglePlaceAutoCompleteTextField(
+      textEditingController: _searchController,
+      googleAPIKey: "AIzaSyAVNNJrEeHazGe_U5SGEr6mF4uQ5G_vKYs",
+      inputDecoration: InputDecoration(
+        hintText: "Search location...",
+        hintStyle: TextStyle(color: AppColors.textGray400, fontSize: 14.sp),
+        prefixIcon: Icon(Icons.search_rounded, color: AppColors.textGray400, size: 20.sp),
+       // suffixIcon: Icon(Icons.close_rounded, color: AppColors.textGray400, size: 20.sp),
+        filled: true,
+        fillColor: Colors.white,
+        contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12.r),
+          borderSide: BorderSide(color: AppColors.borderLight),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12.r),
+          borderSide: BorderSide(color: AppColors.borderLight),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12.r),
+          borderSide: BorderSide(color: AppColors.authPurple),
+        ),
       ),
-      child: Row(
-        children: [
-          Icon(Icons.search_rounded, color: AppColors.textGray400, size: 20.sp),
-          SizedBox(width: 12.w),
-          Expanded(
-            child: TextField(
-              controller: _searchController,
-              onChanged: locationProvider.updateSearchQuery,
-              style: textTheme.bodyMedium?.copyWith(fontSize: 14.sp),
-              decoration: InputDecoration(
-                hintText: '123 Maple street, toronto, ON, Canada',
-                hintStyle: textTheme.bodyMedium?.copyWith(color: AppColors.textGray400),
-                border: InputBorder.none,
-              ),
-            ),
+      debounceTime: 800,
+      itemClick: (Prediction prediction) async {
+        _searchController.text = prediction.description ?? "";
+        _searchController.selection = TextSelection.fromPosition(TextPosition(offset: prediction.description?.length ?? 0));
+        
+        if (prediction.description != null) {
+          await provider.updateLocationFromAddressText(prediction.description!);
+          _mapController?.animateCamera(CameraUpdate.newLatLng(provider.selectedLatLng));
+        }
+      },
+      itemBuilder: (context, index, Prediction prediction) {
+        return Container(
+          padding: EdgeInsets.all(10),
+          child: Row(
+            children: [
+              Icon(Icons.location_on, color: AppColors.authPurple),
+              SizedBox(width: 7),
+              Expanded(child: Text(prediction.description ?? ""))
+            ],
           ),
-          Icon(Icons.close_rounded, color: AppColors.textGray400, size: 20.sp),
-        ],
-      ),
+        );
+      },
     );
   }
 
-  Widget _buildMapSection(TextTheme textTheme) {
+  Widget _buildMapSection(LocationProvider provider) {
     return Container(
-      height: 200.h,
+      height: 300.h,
       width: double.infinity,
       decoration: BoxDecoration(
-        color: AppColors.primarySurface,
         borderRadius: BorderRadius.circular(16.r),
-        image: const DecorationImage(
-          image: NetworkImage('https://via.placeholder.com/400x200'),
-          fit: BoxFit.cover,
-        ),
+        border: Border.all(color: AppColors.borderLight),
       ),
-      child: Stack(
-        children: [
-          Center(
-            child: Icon(Icons.location_on_rounded, color: AppColors.error, size: 32.sp),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16.r),
+        child: GoogleMap(
+          initialCameraPosition: CameraPosition(
+            target: provider.selectedLatLng,
+            zoom: 15,
           ),
-          Positioned(
-            top: 16.h,
-            left: 0,
-            right: 0,
-            child: Center(
-              child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(8.r),
-                  boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 4)],
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.gps_fixed_rounded, color: AppColors.authPurple, size: 16.sp),
-                    SizedBox(width: 8.w),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('Auto-detected location', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 10.sp)),
-                        Text('Accuracy: High', style: TextStyle(color: AppColors.textGray500, fontSize: 9.sp)),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
+          onMapCreated: _onMapCreated,
+          onCameraMove: (position) {
+            // No need to update provider on every move, only on idle
+          },
+          onCameraIdle: () async {
+            if (_mapController != null) {
+              final LatLngBounds bounds = await _mapController!.getVisibleRegion();
+              final LatLng center = LatLng(
+                (bounds.northeast.latitude + bounds.southwest.latitude) / 2,
+                (bounds.northeast.longitude + bounds.southwest.longitude) / 2,
+              );
+              // Only update if it moved significantly to avoid infinite loops if any
+              if ((center.latitude - provider.selectedLatLng.latitude).abs() > 0.0001 ||
+                  (center.longitude - provider.selectedLatLng.longitude).abs() > 0.0001) {
+                provider.updateLocationFromLatLng(center);
+              }
+            }
+          },
+          onTap: (latLng) {
+            provider.updateLocationFromLatLng(latLng);
+            _mapController?.animateCamera(CameraUpdate.newLatLng(latLng));
+          },
+          markers: {
+            Marker(
+              markerId: const MarkerId('selected_location'),
+              position: provider.selectedLatLng,
             ),
-          ),
-        ],
+          },
+          myLocationEnabled: true,
+          myLocationButtonEnabled: false,
+          zoomControlsEnabled: false,
+        ),
       ),
     );
   }
@@ -196,91 +217,66 @@ class _SelectLocationScreenState extends State<SelectLocationScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('123 Maple Street', style: textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700)),
-              Text('Toronto, ON, Canada', style: textTheme.bodySmall?.copyWith(color: AppColors.textGray500)),
+              Text(
+                provider.isLoading ? 'Loading address...' : provider.selectedAddress.split(',').first,
+                style: textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700),
+              ),
+              Text(
+                provider.isLoading ? '' : provider.selectedAddress.split(',').skip(1).join(',').trim(),
+                style: textTheme.bodySmall?.copyWith(color: AppColors.textGray500),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
             ],
           ),
-        ),
-        TextButton.icon(
-          onPressed: () {},
-          icon: Icon(Icons.edit_rounded, size: 14.sp, color: AppColors.authPurple),
-          label: Text('Edit', style: TextStyle(color: AppColors.authPurple, fontSize: 12.sp)),
         ),
       ],
     );
   }
 
   Widget _buildCurrentLocationToggle(TextTheme textTheme, LocationProvider provider) {
-    return Container(
-      padding: EdgeInsets.all(16.w),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12.r),
-        border: Border.all(color: AppColors.borderLight),
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: EdgeInsets.all(8.w),
-            decoration: BoxDecoration(color: AppColors.authPurple, borderRadius: BorderRadius.circular(8.r)),
-            child: Icon(Icons.gps_fixed_rounded, color: Colors.white, size: 20.sp),
-          ),
-          SizedBox(width: 16.w),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Use my current location', style: textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700)),
-                Text('Detect my current location automatically', style: textTheme.bodySmall?.copyWith(color: AppColors.textGray500, fontSize: 10.sp)),
-              ],
+    return InkWell(
+      onTap: () => provider.toggleUseCurrentLocation(!provider.useCurrentLocation),
+      child: Container(
+        padding: EdgeInsets.all(16.w),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12.r),
+          border: Border.all(color: AppColors.borderLight),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: EdgeInsets.all(8.w),
+              decoration: BoxDecoration(color: AppColors.authPurple, borderRadius: BorderRadius.circular(8.r)),
+              child: Icon(Icons.gps_fixed_rounded, color: Colors.white, size: 20.sp),
             ),
-          ),
-          Switch(
-            value: provider.useCurrentLocation,
-            onChanged: provider.toggleUseCurrentLocation,
-            activeColor: AppColors.authPurple,
-          ),
-        ],
+            SizedBox(width: 16.w),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Use my current location', style: textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700)),
+                  Text('Detect my current location automatically', style: textTheme.bodySmall?.copyWith(color: AppColors.textGray500, fontSize: 10.sp)),
+                ],
+              ),
+            ),
+            Switch(
+              value: provider.useCurrentLocation,
+              onChanged: provider.toggleUseCurrentLocation,
+              activeColor: AppColors.authPurple,
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildSavedLocationItem(IconData icon, String title, String address, bool isSelected) {
-    return Padding(
-      padding: EdgeInsets.only(bottom: 12.h),
-      child: Row(
-        children: [
-          Container(
-            padding: EdgeInsets.all(10.w),
-            decoration: BoxDecoration(color: AppColors.authPurple, borderRadius: BorderRadius.circular(10.r)),
-            child: Icon(icon, color: Colors.white, size: 20.sp),
-          ),
-          SizedBox(width: 16.w),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(title, style: const TextStyle(fontWeight: FontWeight.w700)),
-                Text(address, style: TextStyle(color: AppColors.textGray500, fontSize: 11.sp), maxLines: 1, overflow: TextOverflow.ellipsis),
-              ],
-            ),
-          ),
-          Radio<bool>(
-            value: true,
-            groupValue: isSelected,
-            onChanged: (v) {},
-            activeColor: AppColors.authPurple,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildConfirmButton(TextTheme textTheme, LocationProvider locationProvider) {
+  Widget _buildConfirmButton(LocationProvider provider) {
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton(
-        onPressed: () => context.pop(),
+        onPressed: provider.isLoading ? null : () => context.pop(provider.selectedAddress),
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.authPurple,
           foregroundColor: Colors.white,
@@ -288,7 +284,9 @@ class _SelectLocationScreenState extends State<SelectLocationScreen> {
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
           elevation: 0,
         ),
-        child: const Text('Confirm Location', style: TextStyle(fontWeight: FontWeight.w700)),
+        child: provider.isLoading 
+            ? SizedBox(height: 20.h, width: 20.h, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+            : const Text('Confirm Location', style: TextStyle(fontWeight: FontWeight.w700)),
       ),
     );
   }

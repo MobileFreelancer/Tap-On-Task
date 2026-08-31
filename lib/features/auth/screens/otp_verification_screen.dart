@@ -51,7 +51,36 @@ class OtpVerificationScreen extends StatelessWidget {
           Center(
             child: form.canResend
                 ? GestureDetector(
-                    onTap: () => context.read<AuthFormProvider>().startResendTimer(),
+                    onTap: () async {
+                      context.read<AuthFormProvider>().startResendTimer();
+                      final authService = context.read<AuthService>();
+                      if (flow == 'reset') {
+                        final otp = await authService.resendResetOtp(phoneNumber);
+                        if (otp != null && context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('OTP resent successfully: $otp'),
+                              backgroundColor: AppColors.authPurple,
+                            ),
+                          );
+                        }
+                      } else {
+                        final otp = await authService.signup(
+                          name: form.nameController.text.trim().isNotEmpty ? form.nameController.text.trim() : 'User',
+                          email: phoneNumber,
+                          phone: form.phoneController.text.trim().isNotEmpty ? form.phoneController.text.trim() : '0000000000',
+                          password: form.passwordController.text.isNotEmpty ? form.passwordController.text : 'Test@123456',
+                        );
+                        if (otp != null && context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('OTP resent successfully: $otp'),
+                              backgroundColor: AppColors.authPurple,
+                            ),
+                          );
+                        }
+                      }
+                    },
                     child: Text.rich(
                       TextSpan(
                         style: textTheme.bodySmall?.copyWith(
@@ -102,14 +131,14 @@ class OtpVerificationScreen extends StatelessWidget {
     final form = context.read<AuthFormProvider>();
     final auth = context.read<AuthService>();
 
-    final success = await auth.verifyOtp(phone: phoneNumber, otp: form.otpCode);
+    final success = await auth.verifyOtp(email: phoneNumber, otp: form.otpCode);
     if (!context.mounted) return;
 
     if (success) {
       if (flow == 'reset') {
         context.goNamed('resetPassword', queryParameters: {'phone': phoneNumber});
       } else {
-        final route = auth.isCustomer ? '/customer/dashboard' : '/trader/dashboard';
+        final route = auth.isTrader ? '/trader/dashboard' : '/customer/dashboard';
         context.go(route);
       }
     }

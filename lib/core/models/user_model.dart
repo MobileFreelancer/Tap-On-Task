@@ -29,19 +29,19 @@ class UserModel {
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
-      id: json['id'] as String? ?? '',
-      phoneNumber: json['phoneNumber'] as String? ?? '',
+      id: (json['id'] ?? json['userId'] ?? '').toString(),
+      phoneNumber: json['phone'] as String? ?? json['phoneNumber'] as String? ?? '',
       name: json['name'] as String?,
       email: json['email'] as String?,
-      avatarUrl: json['avatarUrl'] as String?,
+      avatarUrl: json['avatarUrl'] as String? ?? json['image'] as String?,
       role: _parseRole(json['role'] as String? ?? 'customer'),
       rating: (json['rating'] as num?)?.toDouble() ?? 0.0,
       taskCount: (json['taskCount'] as num?)?.toInt() ?? 0,
       completedTasks: (json['completedTasks'] as num?)?.toInt() ?? 0,
-      createdAt: json['createdAt'] != null
-          ? DateTime.parse(json['createdAt'] as String)
-          : DateTime.now(),
-      isVerified: json['isVerified'] as bool? ?? false,
+      createdAt: json['created_at'] != null
+          ? DateTime.parse(json['created_at'] as String)
+          : (json['createdAt'] != null ? DateTime.parse(json['createdAt'] as String) : DateTime.now()),
+      isVerified: json['email_verified_at'] != null || (json['isVerified'] as bool? ?? false),
     );
   }
 
@@ -97,8 +97,8 @@ class UserModel {
   }
 
   String get initials {
-    if (name == null || name!.isEmpty) return phoneNumber.substring(phoneNumber.length - 4);
-    final parts = name!.split(' ');
+    if (name == null || name!.isEmpty) return phoneNumber.length > 4 ? phoneNumber.substring(phoneNumber.length - 4) : phoneNumber;
+    final parts = name!.trim().split(' ');
     if (parts.length >= 2) return '${parts.first[0]}${parts.last[0]}'.toUpperCase();
     return parts.first[0].toUpperCase();
   }

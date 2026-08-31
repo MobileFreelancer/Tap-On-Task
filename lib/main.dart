@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'core/config/api_config.dart';
 import 'core/utils/responsive_utils.dart';
 import 'core/services/auth_service.dart';
 import 'core/services/firebase_service.dart';
@@ -22,6 +24,10 @@ Future<void> main() async {
   try {
     await dotenv.load(fileName: '.env');
   } catch (_) {}
+
+  Stripe.publishableKey = ApiConfig.stripePublishableKey;
+  Stripe.merchantIdentifier = 'merchant.com.app.tapontask';
+  await Stripe.instance.applySettings();
 
   final firebaseReady = await FirebaseService.instance.initialize();
 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../features/profile/screens/help_support_screen.dart';
 import '../../features/trader/screens/job_confirmation_screen.dart';
 import '../../features/trader/screens/active_job_Screen.dart';
 import '../services/auth_service.dart';
@@ -72,7 +73,7 @@ class AppRouter {
         builder: (_, state) => ResetPasswordScreen(phone: state.uri.queryParameters['phone']),
       ),
 
-      // ----- Customer Shell (Bottom Nav) -----
+      // ----- Customer Shell (Bottom Nav - the 5 main tabs ONLY) -----
       ShellRoute(
         builder: (context, state, child) {
           final index = _customerNavIndex(state.uri.path);
@@ -80,45 +81,14 @@ class AppRouter {
         },
         routes: [
           GoRoute(path: '/customer/dashboard', name: 'customerDashboard', builder: (_, _) => const HomeScreen()),
-          GoRoute(path: '/customer/post-task', name: 'postTask', builder: (_, _) => const PostTaskScreen()),
           GoRoute(path: '/categories', name: 'categories', builder: (_, _) => const CategoriesScreen()),
           GoRoute(path: '/help', name: 'help', builder: (_, _) => const HelpSupportScreen()),
           GoRoute(path: '/profile', name: 'profile', builder: (_, _) => const ProfileScreen()),
-          
-          // Flow Screens (keep bottom bar)
-          GoRoute(
-            path: '/service-listing',
-            name: 'serviceListing',
-            builder: (_, state) => ServiceListingScreen(
-              categoryId: state.uri.queryParameters['categoryId'] ?? '',
-              categoryName: state.uri.queryParameters['categoryName'] ?? 'Services',
-            ),
-          ),
-          GoRoute(
-            path: '/location-select',
-            name: 'locationSelect',
-            builder: (_, state) => const SelectLocationScreen(),
-          ),
-          GoRoute(
-            path: '/matching-traders/:taskId',
-            name: 'matchingTraders',
-            builder: (_, state) => MatchingTradersScreen(taskId: state.pathParameters['taskId']!),
-          ),
-          GoRoute(
-            path: '/quotes/:taskId',
-            name: 'quotes',
-            builder: (_, state) => QuotesScreen(taskId: state.pathParameters['taskId']!),
-          ),
-
-          GoRoute(path: '/customer/search', name: 'search', builder: (_, _) => const SearchScreen()),
-          GoRoute(path: '/customer/my-tasks', name: 'myTasks', builder: (_, _) => const MyTasksScreen()),
-          GoRoute(path: '/customer/messages', name: 'messages', builder: (_, _) => const MessagesScreen()),
-          GoRoute(path: '/wallet', name: 'wallet', builder: (_, _) => const WalletScreen()),
-          GoRoute(path: '/notifications', name: 'notifications', builder: (_, _) => const NotificationsScreen()),
         ],
       ),
+          GoRoute(path: '/customer/post-task', name: 'postTask', builder: (_, _) => const PostTaskScreen()),
 
-      // ----- Trader Shell (Bottom Nav) -----
+      // ----- Trader Shell (Bottom Nav - the 5 main tabs ONLY) -----
       ShellRoute(
         builder: (context, state, child) {
           final index = _traderNavIndex(state.uri.path);
@@ -127,13 +97,42 @@ class AppRouter {
         routes: [
           GoRoute(path: '/trader/dashboard', name: 'traderDashboard', builder: (_, _) => const TraderDashboard()),
           GoRoute(path: '/trader/available-tasks', name: 'availableTasks', builder: (_, _) => const AvailableTasksScreen()),
-          GoRoute(path: '/trader/my-bids', name: 'myBids', builder: (_, _) => const MyBidsScreen()),
-          GoRoute(path: '/trader/messages', name: 'traderMessages', builder: (_, _) => const MessagesScreen()),
           GoRoute(path: '/trader/profile', name: 'traderProfile', builder: (_, _) => const ProfileScreen()),
         ],
       ),
 
-      // ----- Feature Routes (outside shell) -----
+      // ----- Everything below is OUTSIDE the shell -> no bottom bar at all -----
+      GoRoute(
+        path: '/service-listing',
+        name: 'serviceListing',
+        builder: (_, state) => ServiceListingScreen(
+          categoryId: state.uri.queryParameters['categoryId'] ?? '',
+          categoryName: state.uri.queryParameters['categoryName'] ?? 'Services',
+        ),
+      ),
+      GoRoute(
+        path: '/location-select',
+        name: 'locationSelect',
+        builder: (_, state) => const SelectLocationScreen(),
+      ),
+      GoRoute(
+        path: '/quotes/:taskId',
+        name: 'quotes',
+        builder: (_, state) => QuotesScreen(taskId: state.pathParameters['taskId']!),
+      ),
+      GoRoute(path: '/customer/search', name: 'search', builder: (_, _) => const SearchScreen()),
+      GoRoute(path: '/customer/my-tasks', name: 'myTasks', builder: (_, _) => const MyTasksScreen()),
+      GoRoute(path: '/customer/messages', name: 'messages', builder: (_, _) => const MessagesScreen()),
+      GoRoute(path: '/wallet', name: 'wallet', builder: (_, _) => const WalletScreen()),
+      GoRoute(path: '/notifications', name: 'notifications', builder: (_, _) => const NotificationsScreen()),
+      GoRoute(path: '/trader/my-bids', name: 'myBids', builder: (_, _) => const MyBidsScreen()),
+      GoRoute(path: '/trader/messages', name: 'traderMessages', builder: (_, _) => const MessagesScreen()),
+      GoRoute(path: '/post-task-success', name: 'postTaskSuccess', builder: (_, _) => const PostTaskSuccessScreen()),
+      GoRoute(
+        path: '/matching-traders/:taskId',
+        name: 'matchingTraders',
+        builder: (_, state) => MatchingTradersScreen(taskId: state.pathParameters['taskId']!),
+      ),
       GoRoute(
         path: '/service/:serviceId',
         name: 'serviceDetail',
@@ -178,8 +177,6 @@ class AppRouter {
         name: 'addCard',
         builder: (_, _) => const AddCardScreen(),
       ),
-      GoRoute(path: '/wallet', name: 'wallet', builder: (_, _) => const WalletScreen()),
-      GoRoute(path: '/notifications', name: 'notifications', builder: (_, _) => const NotificationsScreen()),
       GoRoute(
         path: '/task/:taskId',
         name: 'taskDetail',
@@ -194,11 +191,7 @@ class AppRouter {
 
   static int _customerNavIndex(String path) {
     if (path.startsWith('/customer/post-task')) return 0;
-    if (path.startsWith('/categories') ||
-        path.startsWith('/service-listing') ||
-        path.startsWith('/location-select') ||
-        path.startsWith('/matching-traders') ||
-        path.startsWith('/quotes')) return 1;
+    if (path.startsWith('/categories')) return 1;
     if (path.startsWith('/customer/dashboard')) return 2;
     if (path.startsWith('/help')) return 3;
     if (path.startsWith('/profile')) return 4;

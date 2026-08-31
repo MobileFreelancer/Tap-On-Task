@@ -132,6 +132,11 @@ class _LocationSelectScreenState extends State<LocationSelectScreen> {
                     width: double.infinity,
                     child: ElevatedButton(
                       onPressed: () {
+                        if ((widget.serviceId == null || widget.serviceId!.isEmpty) && 
+                            (widget.providerId == null || widget.providerId!.isEmpty)) {
+                          context.pop(_addressController.text);
+                          return;
+                        }
                         final scheduledAt = DateTime(
                           _selectedDate.year,
                           _selectedDate.month,

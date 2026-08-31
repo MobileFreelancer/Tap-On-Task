@@ -152,13 +152,12 @@ class LoginScreen extends StatelessWidget {
     }
 
     final success = await auth.login(
-      phone: form.emailController.text.trim(),
+      email: form.emailController.text.trim(),
       password: form.passwordController.text,
-      role: form.selectedRole,
     );
 
     if (success && context.mounted) {
-      final route = form.selectedRole == UserRole.customer ? '/customer/dashboard' : '/trader/dashboard';
+      final route = auth.isTrader ? '/trader/dashboard' : '/customer/dashboard';
       context.go(route);
     }
   }

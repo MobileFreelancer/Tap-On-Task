@@ -1,12 +1,13 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-import 'package:intl/intl.dart';
+import 'package:tapontask/core/theme/text_styles.dart';
 import '../../../core/constants/app_colors.dart';
-import '../../../core/models/service_model.dart';
-import '../../../core/services/app_services.dart';
 import '../../../core/widgets/app_gradient_header.dart';
+import '../../auth/widgets/auth_scaffold.dart';
 import '../providers/post_task_provider.dart';
 
 class PostTaskScreen extends StatefulWidget {
@@ -25,7 +26,9 @@ class _PostTaskScreenState extends State<PostTaskScreen> {
     super.initState();
     final provider = context.read<PostTaskProvider>();
     _descriptionController = TextEditingController(text: provider.taskDescription);
-    _budgetController = TextEditingController(text: provider.estimatedBudget > 0 ? provider.estimatedBudget.toString() : '');
+    _budgetController = TextEditingController(
+      text: provider.estimatedBudget > 0 ? provider.estimatedBudget.toString() : '',
+    );
   }
 
   @override
@@ -38,7 +41,6 @@ class _PostTaskScreenState extends State<PostTaskScreen> {
   @override
   Widget build(BuildContext context) {
     final postTaskProvider = context.watch<PostTaskProvider>();
-    final homeService = context.watch<HomeService>();
     final textTheme = Theme.of(context).textTheme;
 
     return Scaffold(
@@ -67,7 +69,7 @@ class _PostTaskScreenState extends State<PostTaskScreen> {
                     'Tell us what you need, we\'ll help you find the right professional',
                     textAlign: TextAlign.center,
                     style: textTheme.bodyMedium?.copyWith(
-                      color: Colors.white.withValues(alpha: 0.85),
+                      color: Colors.white.withOpacity(0.85),
                       fontSize: 13.sp,
                     ),
                   ),
@@ -83,37 +85,184 @@ class _PostTaskScreenState extends State<PostTaskScreen> {
                   color: AppColors.backgroundWhite,
                   borderRadius: BorderRadius.vertical(top: Radius.circular(30.r)),
                 ),
-                child: SingleChildScrollView(
-                  padding: EdgeInsets.fromLTRB(20.w, 24.h, 20.w, 24.h),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _buildSectionHeader('Select Category', textTheme),
-                      SizedBox(height: 12.h),
-                      _buildCategoryDropdown(homeService, postTaskProvider, textTheme),
-                      SizedBox(height: 24.h),
-                      _buildSectionHeader('Task Description', textTheme, subtitle: 'Provide a detailed description of your task'),
-                      SizedBox(height: 12.h),
-                      _buildDescriptionField(postTaskProvider, textTheme),
-                      SizedBox(height: 24.h),
-                      _buildPhotoSection(postTaskProvider, textTheme),
-                      SizedBox(height: 24.h),
-                      _buildSectionHeader('Location', textTheme),
-                      SizedBox(height: 12.h),
-                      _buildLocationSection(postTaskProvider, textTheme),
-                      SizedBox(height: 24.h),
-                      _buildSectionHeader('Preferred Date & Time', textTheme),
-                      SizedBox(height: 12.h),
-                      _buildDateTimeSection(postTaskProvider, textTheme),
-                      SizedBox(height: 24.h),
-                      _buildSectionHeader('Set your estimated budget', textTheme, subtitle: '(optional)'),
-                      SizedBox(height: 12.h),
-                      _buildBudgetField(postTaskProvider, textTheme),
-                      SizedBox(height: 32.h),
-                      _buildContinueButton(postTaskProvider, textTheme),
-                    ],
-                  ),
-                ),
+                child:  postTaskProvider.categoryError != null
+                        ? Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text('Error: ${postTaskProvider.categoryError}'),
+                                ElevatedButton(
+                                  onPressed: () => postTaskProvider.fetchCategories(),
+                                  child: const Text('Retry'),
+                                ),
+                              ],
+                            ),
+                          )
+                        : SingleChildScrollView(
+                            padding: EdgeInsets.fromLTRB(12.w, 24.h, 12.w, 24.h),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                _buildSectionLabel('Select Category', textTheme),
+                                SizedBox(height: 8.h),
+                                _buildCategoryDropdown(postTaskProvider),
+                                if (postTaskProvider.selectedCategoryId.isNotEmpty) ...[
+                                  SizedBox(height: 16.h),
+                                  _buildSectionLabel('Select Subcategory', textTheme),
+                                  SizedBox(height: 8.h),
+                                  _buildSubcategoryDropdown(postTaskProvider),
+                                ],
+                                SizedBox(height: 15.h),
+                                Container(
+                                  padding: EdgeInsets.all(13.w),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(18.r),
+                                    border: Border.all(
+                                      color: const Color(0xFFF1F3F6),
+                                      width: 1,
+                                    ),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: const Color(0x14000000), // 8% black
+                                        offset: const Offset(0, 4),
+                                        blurRadius: 18,
+                                        spreadRadius: 0,
+                                      ),
+                                      BoxShadow(
+                                        color: const Color(0x08A3B1C6), // subtle blue shadow
+                                        offset: const Offset(0, 1),
+                                        blurRadius: 4,
+                                        spreadRadius: 0,
+                                      ),
+                                    ],
+                                  ),
+                                  child:  Column(
+                                    children: [
+                                      _buildSectionLabelWithIcon(
+                                        Icons.description_outlined,
+                                        'Task Description',
+                                        textTheme,
+                                        subtitle: 'Provide a detailed description of your task',
+                                      ),
+                                      SizedBox(height: 12.h),
+                                      _buildDescriptionField(postTaskProvider, textTheme),
+                                    ],
+                                  ),
+                                ),
+
+                                SizedBox(height: 15.h),
+                                _buildPhotoSection(postTaskProvider, textTheme),
+                                SizedBox(height: 15.h),
+                                Container(
+                                  padding: EdgeInsets.all(13.w),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(18.r),
+                                    border: Border.all(
+                                      color: const Color(0xFFF1F3F6),
+                                      width: 1,
+                                    ),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: const Color(0x14000000), // 8% black
+                                        offset: const Offset(0, 4),
+                                        blurRadius: 18,
+                                        spreadRadius: 0,
+                                      ),
+                                      BoxShadow(
+                                        color: const Color(0x08A3B1C6), // subtle blue shadow
+                                        offset: const Offset(0, 1),
+                                        blurRadius: 4,
+                                        spreadRadius: 0,
+                                      ),
+                                    ],
+                                  ),
+                                  child: Column(
+                                    children: [
+                                      _buildSectionLabelWithIcon(Icons.location_on_outlined, 'Location', textTheme),
+                                      SizedBox(height: 12.h),
+                                      _buildLocationSection(postTaskProvider, textTheme),
+                                    ],
+                                  ),
+                                ),
+                                SizedBox(height: 15.h),
+                                Container(
+                                  padding: EdgeInsets.all(13.w),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(18.r),
+                                    border: Border.all(
+                                      color: const Color(0xFFF1F3F6),
+                                      width: 1,
+                                    ),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: const Color(0x14000000), // 8% black
+                                        offset: const Offset(0, 4),
+                                        blurRadius: 18,
+                                        spreadRadius: 0,
+                                      ),
+                                      BoxShadow(
+                                        color: const Color(0x08A3B1C6), // subtle blue shadow
+                                        offset: const Offset(0, 1),
+                                        blurRadius: 4,
+                                        spreadRadius: 0,
+                                      ),
+                                    ],
+                                  ),
+                                  child: Column(
+                                    children: [
+                                      _buildSectionLabelWithIcon(Icons.calendar_month, 'Preferred Date & Time', textTheme),
+                                      SizedBox(height: 12.h),
+                                      _buildDateTimeSection(postTaskProvider, textTheme),
+                                    ],
+                                  ),
+                                ),
+                                SizedBox(height: 15.h),
+                                Container(
+                                  padding: EdgeInsets.all(13.w),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(18.r),
+                                    border: Border.all(
+                                      color: const Color(0xFFF1F3F6),
+                                      width: 1,
+                                    ),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: const Color(0x14000000), // 8% black
+                                        offset: const Offset(0, 4),
+                                        blurRadius: 18,
+                                        spreadRadius: 0,
+                                      ),
+                                      BoxShadow(
+                                        color: const Color(0x08A3B1C6), // subtle blue shadow
+                                        offset: const Offset(0, 1),
+                                        blurRadius: 4,
+                                        spreadRadius: 0,
+                                      ),
+                                    ],
+                                  ),
+                                  child: Column(
+                                    children: [
+                                      _buildSectionLabelWithIcon(
+                                        Icons.monetization_on_outlined,
+                                        'Set your estimated budget',
+                                        textTheme,
+                                        subtitle: '(optional)',
+                                      ),
+                                      SizedBox(height: 12.h),
+                                      _buildBudgetField(postTaskProvider, textTheme),
+                                    ],
+                                  ),
+                                ),
+                                SizedBox(height: 32.h),
+                                _buildContinueButton(postTaskProvider, textTheme),
+                                SizedBox(height: 70.h),
+                              ],
+                            ),
+                          ),
               ),
             ),
           ),
@@ -122,165 +271,389 @@ class _PostTaskScreenState extends State<PostTaskScreen> {
     );
   }
 
-  Widget _buildSectionHeader(String title, TextTheme textTheme, {String? subtitle}) {
+  Widget _buildSectionLabel(String label, TextTheme textTheme) {
+    return Text(
+      label,
+      style: TextStylesInApp.soraHeader(
+          color: AppColors.authNavy,
+          fontWeight: FontWeight.w600,
+          fontSize: 16.sp
+      ),
+    );
+  }
+
+  Widget _buildSectionLabelWithIcon(
+    IconData icon,
+    String label,
+    TextTheme textTheme, {
+    String? subtitle,
+  }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           children: [
-            _getIconForTitle(title),
+            Icon(icon, color: AppColors.authNavy, size: 20.sp),
             SizedBox(width: 8.w),
             Text(
-              title,
-              style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700, color: AppColors.authNavy),
+              label,
+              style: TextStylesInApp.soraHeader(
+                  color: AppColors.authNavy,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 16.sp
+              ),
             ),
           ],
         ),
         if (subtitle != null)
           Padding(
             padding: EdgeInsets.only(left: 28.w),
-            child: Text(subtitle, style: textTheme.bodySmall?.copyWith(color: AppColors.textGray500)),
+            child: Text(
+              subtitle,
+              style:  TextStylesInApp.soraHeader(
+    color: AppColors.textGray500,
+    fontWeight: FontWeight.w400,
+    fontSize: 12.sp
+    ),
+            ),
           ),
       ],
     );
   }
 
-  Widget _getIconForTitle(String title) {
-    IconData icon = Icons.info_outline_rounded;
-    if (title.contains('Category')) icon = Icons.grid_view_rounded;
-    if (title.contains('Description')) icon = Icons.description_outlined;
-    if (title.contains('Photos')) icon = Icons.image_outlined;
-    if (title.contains('Location')) icon = Icons.location_on_outlined;
-    if (title.contains('Date')) icon = Icons.calendar_today_outlined;
-    if (title.contains('budget')) icon = Icons.monetization_on_outlined;
-    return Icon(icon, color: AppColors.authNavy, size: 20.sp);
+  Widget _buildCategoryDropdown(PostTaskProvider provider) {
+    final categories = provider.categories;
+    String? value = categories.any((c) => c.id.toString() == provider.selectedCategoryId)
+        ? provider.selectedCategoryId
+        : null;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.backgroundGray,
+        borderRadius: BorderRadius.circular(12.r),
+        //border: Border.all(color: AppColors.borderLight),
+      ),
+      child: DropdownButtonFormField<String>(
+        value: value,
+        hint:  Text('Select a category',style: TextStylesInApp.soraHeader(
+          color: AppColors.textGray500,
+          fontWeight: FontWeight.w400,
+          fontSize: 12.sp
+        ),),
+        decoration: InputDecoration(
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16.r),
+            borderSide: BorderSide.none,
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16.r),
+            borderSide: BorderSide.none,
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16.r),
+            borderSide: BorderSide.none,
+          ),
+          fillColor:AppColors.backgroundGray,
+          contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+          prefixIcon: Icon(Icons.grid_view_rounded, color: AppColors.authPurple, size: 20.sp),
+        ),
+        icon:provider.isLoadingCategories?SizedBox(height: 20.h,width: 20.w,child: CircularProgressIndicator()):Icon(Icons.keyboard_arrow_down_rounded, color: AppColors.textGray500),
+        items: categories.map((c) {
+          return DropdownMenuItem<String>(
+            value: c.id.toString(),
+            child: Row(
+              spacing: 5.w,
+              children: [
+                SvgPicture.network(
+                  c.iconPath.toString(),
+                  fit: BoxFit.cover,
+                  placeholderBuilder: (context) => const Center(
+                    child: CircularProgressIndicator(),
+                  ),
+                  errorBuilder: (context, error, stackTrace) {
+                    return Icon(Icons.error, color: AppColors.authPurple, size: 20.sp);
+                  },
+                ),
+                Text(c.name,style: TextStylesInApp.robotoBody(color: AppColors.authNavy,fontSize: 13.sp,fontWeight: FontWeight.w400),),
+              ],
+            ),
+          );
+        }).toList(),
+        onChanged: (val) {
+          if (val != null) {
+            provider.selectCategory(val);
+          }
+        },
+      ),
+    );
   }
 
-  Widget _buildCategoryDropdown(HomeService homeService, PostTaskProvider provider, TextTheme textTheme) {
+  Widget _buildSubcategoryDropdown(PostTaskProvider provider) {
+    final subcategories = provider.categories
+        .firstWhere((c) => c.id.toString() == provider.selectedCategoryId).subcategories;
+
+    String? value = subcategories.any((s) => s.id.toString() == provider.selectedSubcategoryId)
+        ? provider.selectedSubcategoryId
+        : null;
+
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
       decoration: BoxDecoration(
-        color: AppColors.backgroundGray.withValues(alpha: 0.5),
+        color: AppColors.backgroundGray.withOpacity(0.5),
         borderRadius: BorderRadius.circular(12.r),
         border: Border.all(color: AppColors.borderLight),
       ),
-      child: Row(
-        children: [
-          Icon(Icons.plumbing_rounded, color: AppColors.authPurple, size: 20.sp),
-          SizedBox(width: 12.w),
-          Expanded(child: Text('Plumbing', style: textTheme.bodyMedium)),
-          Icon(Icons.keyboard_arrow_down_rounded, color: AppColors.textGray500),
-        ],
+      child: DropdownButtonFormField<String>(
+        value: value,
+        hint:   Text('Select a subcategory',style: TextStylesInApp.soraHeader(
+            color: AppColors.textGray500,
+            fontWeight: FontWeight.w400,
+            fontSize: 12.sp
+        )),
+        decoration: InputDecoration(
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16.r),
+            borderSide: BorderSide.none,
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16.r),
+            borderSide: BorderSide.none,
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16.r),
+            borderSide: BorderSide.none,
+          ),
+          fillColor:AppColors.backgroundGray,
+          contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+          prefixIcon: Icon(Icons.subdirectory_arrow_right_rounded, color: AppColors.authPurple, size: 20.sp),
+        ),
+        icon: Icon(Icons.keyboard_arrow_down_rounded, color: AppColors.textGray500),
+        items: subcategories.map((s) {
+          return DropdownMenuItem<String>(
+            value: s.id.toString(),
+            child: Row(
+              spacing: 10.w,
+              children: [
+                Image.network(
+                  s.imagePath.toString(),
+                  fit: BoxFit.cover,
+                  height: 25.h,
+                  width: 25.w,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Icon(Icons.error, color: AppColors.authPurple, size: 20.sp);
+                  },
+                ),
+                Text(s.name,style: TextStylesInApp.robotoBody(color: AppColors.authNavy,fontSize: 13.sp,fontWeight: FontWeight.w400),),
+              ],
+            ),
+          );
+        }).toList(),
+        onChanged: (val) {
+          if (val != null) {
+            provider.selectSubcategory(val);
+          }
+        },
       ),
     );
   }
 
   Widget _buildDescriptionField(PostTaskProvider provider, TextTheme textTheme) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         TextField(
           controller: _descriptionController,
           onChanged: provider.updateDescription,
           maxLines: 4,
           decoration: InputDecoration(
-            hintText: 'Describe what needs to be done...',
+            hintText: 'I need a plumber to fix leaking kitchen sink...',
             filled: true,
-            fillColor: AppColors.backgroundGray.withValues(alpha: 0.5),
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12.r), borderSide: BorderSide(color: AppColors.borderLight)),
-            enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12.r), borderSide: BorderSide(color: AppColors.borderLight)),
+            fillColor: AppColors.backgroundGray.withOpacity(0.5),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12.r),
+              borderSide: BorderSide(color: AppColors.borderLight),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12.r),
+              borderSide: BorderSide(color: AppColors.borderLight),
+            ),
           ),
         ),
         SizedBox(height: 8.h),
-        Align(
-          alignment: Alignment.centerLeft,
-          child: Text('120/1000 characters', style: textTheme.labelSmall?.copyWith(color: AppColors.textGray500)),
+        Text(
+          '${provider.taskDescription.length}/1000 characters',
+          style: textTheme.labelSmall?.copyWith(color: AppColors.textGray500),
         ),
       ],
     );
   }
 
   Widget _buildPhotoSection(PostTaskProvider provider, TextTheme textTheme) {
-    return Column(
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            _buildSectionHeader('Add Photos (Optional)', textTheme),
-            Text('Add Photos', style: TextStyle(color: AppColors.authPurple, fontWeight: FontWeight.w700, fontSize: 12.sp)),
-          ],
+    return Container(
+      padding: EdgeInsets.all(13.w),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18.r),
+        border: Border.all(
+          color: const Color(0xFFF1F3F6),
+          width: 1,
         ),
-        SizedBox(height: 12.h),
-        Row(
-          children: [
-            ...List.generate(3, (index) => Container(
-              width: 60.w,
-              height: 60.h,
-              margin: EdgeInsets.only(right: 12.w),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8.r),
-                image: const DecorationImage(image: NetworkImage('https://via.placeholder.com/60'), fit: BoxFit.cover),
-              ),
-              child: Align(
-                alignment: Alignment.topRight,
-                child: Container(
-                  padding: EdgeInsets.all(2.w),
-                  decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
-                  child: Icon(Icons.close_rounded, size: 12.sp, color: Colors.black),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0x14000000), // 8% black
+            offset: const Offset(0, 4),
+            blurRadius: 18,
+            spreadRadius: 0,
+          ),
+          BoxShadow(
+            color: const Color(0x08A3B1C6), // subtle blue shadow
+            offset: const Offset(0, 1),
+            blurRadius: 4,
+            spreadRadius: 0,
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              _buildSectionLabelWithIcon(Icons.image_outlined, 'Add Photos (Optional)', textTheme),
+              GestureDetector(
+                onTap: () => provider.pickImages(),
+                child: Text(
+                  'Add Photos',
+                  style: TextStylesInApp.soraHeader(fontSize: 13.sp,fontWeight: FontWeight.w500,color: AppColors.primaryPurple),
                 ),
               ),
-            )),
-            Container(
-              width: 60.w,
-              height: 60.h,
-              decoration: BoxDecoration(
-                color: AppColors.primarySurface,
-                borderRadius: BorderRadius.circular(8.r),
-              ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.add_rounded, color: AppColors.authPurple, size: 18.sp),
-                  Text('Upload\nMore', textAlign: TextAlign.center, style: TextStyle(color: AppColors.authPurple, fontSize: 8.sp, fontWeight: FontWeight.w700)),
-                ],
-              ),
+            ],
+          ),
+          SizedBox(height: 12.h),
+          SizedBox(
+            height: 80.h,
+            child: ListView(
+              scrollDirection: Axis.horizontal,
+              children: [
+                ...List.generate(provider.selectedPhotos.length, (index) {
+                  return Container(
+                    width: 80.w,
+                    height: 80.h,
+                    margin: EdgeInsets.only(right: 12.w),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12.r),
+                      color: Colors.grey[200],
+                      image: DecorationImage(
+                        image: FileImage(File(provider.selectedPhotos[index])),
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                    child: Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        Align(
+                          alignment: Alignment.topRight,
+                          child: GestureDetector(
+                            onTap: () => provider.removePhoto(index),
+                            child: Container(
+                              margin: EdgeInsets.all(4.w),
+                              padding: EdgeInsets.all(2.w),
+                              decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
+                              child: Icon(Icons.close_rounded, size: 14.sp, color: Colors.black),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }),
+                GestureDetector(
+                  onTap: () => provider.pickImages(),
+                  child: Container(
+                    width: 80.w,
+                    height: 80.h,
+                    decoration: BoxDecoration(
+                      color: AppColors.primarySurface,
+                      borderRadius: BorderRadius.circular(12.r),
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.add_rounded, color: AppColors.authPurple, size: 24.sp),
+                        Text(
+                          'Upload\nMore',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: AppColors.authPurple,
+                            fontSize: 10.sp,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
-        SizedBox(height: 8.h),
-        Text('Provide a detailed description of your task', style: textTheme.labelSmall?.copyWith(color: AppColors.textGray500)),
-      ],
+          ),
+          SizedBox(height: 8.h),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              'Provide a detailed description of your task',
+              style: TextStylesInApp.robotoBody(fontSize: 14.sp,color: AppColors.textGray500,fontWeight: FontWeight.w400),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
   Widget _buildLocationSection(PostTaskProvider provider, TextTheme textTheme) {
-    return Column(
+    final locationText = provider.location.isNotEmpty ? provider.location : 'Select Location';
+    final parts = locationText.split(',');
+    final mainAddress = parts.first;
+    final detailsAddress = parts.length > 1 ? parts.sublist(1).join(',').trim() : '';
+
+    return Row(
       children: [
-        Row(
-          children: [
-            Container(
-              width: 100.w,
-              height: 60.h,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8.r),
-                image: const DecorationImage(image: NetworkImage('https://via.placeholder.com/100x60'), fit: BoxFit.cover),
-              ),
+        Container(
+          width: 100.w,
+          height: 65.h,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12.r),
+            image: const DecorationImage(
+              image: AssetImage('assets/images/mock_map.png'),
+              fit: BoxFit.cover,
             ),
-            SizedBox(width: 12.w),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('123 Maple Street', style: textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700)),
-                  Text('Toronto, ON, Canada', style: textTheme.bodySmall?.copyWith(color: AppColors.textGray500)),
-                  SizedBox(height: 4.h),
-                  GestureDetector(
-                    onTap: () => context.pushNamed('locationSelect'),
-                    child: Text('Change Location >', style: TextStyle(color: AppColors.authPurple, fontWeight: FontWeight.w700, fontSize: 12.sp)),
-                  ),
-                ],
+          ),
+        ),
+        SizedBox(width: 16.w),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(mainAddress, style: TextStylesInApp.soraHeader(fontWeight: FontWeight.w600,color: AppColors.authNavy,fontSize: 16.sp)),
+              if (detailsAddress.isNotEmpty)
+                Text(
+                  detailsAddress,
+                  style: TextStylesInApp.soraHeader(fontWeight: FontWeight.w400,color: AppColors.textGray500,fontSize: 14.sp),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              SizedBox(height: 5.h),
+              GestureDetector(
+                onTap: () async {
+                  final newLoc = await context.pushNamed('locationSelect');
+                  if (newLoc != null && newLoc is String) {
+                    provider.updateLocation(newLoc);
+                  }
+                },
+                child: Text(
+                  'Change Location >',
+                  style: TextStylesInApp.soraHeader(fontWeight: FontWeight.w600,color: AppColors.primaryPurple,fontSize: 14.sp),
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ],
     );
@@ -290,18 +663,56 @@ class _PostTaskScreenState extends State<PostTaskScreen> {
     return Row(
       children: [
         Expanded(
-          child: Container(
-            padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
-            decoration: BoxDecoration(color: AppColors.backgroundGray.withValues(alpha: 0.5), borderRadius: BorderRadius.circular(8.r)),
-            child: Row(children: [Icon(Icons.calendar_today_outlined, size: 16.sp, color: AppColors.textGray500), SizedBox(width: 8.w), Text('May 25, 2025', style: textTheme.bodySmall)]),
+          child: GestureDetector(
+            onTap: () => provider.selectDate(context),
+            child: Container(
+              padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
+              decoration: BoxDecoration(
+                color: AppColors.backgroundGray.withOpacity(0.5),
+                borderRadius: BorderRadius.circular(10.r),
+                border: Border.all(color: AppColors.borderLight),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.calendar_month, size: 16.sp, color: AppColors.textGray500),
+                  SizedBox(width: 8.w),
+                  Expanded(
+                    child: Text(
+                      provider.formattedDate,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStylesInApp.robotoBody(fontSize: 14.sp,fontWeight: FontWeight.w400,color: AppColors.textGray500),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
         ),
         SizedBox(width: 12.w),
         Expanded(
-          child: Container(
-            padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
-            decoration: BoxDecoration(color: AppColors.backgroundGray.withValues(alpha: 0.5), borderRadius: BorderRadius.circular(8.r)),
-            child: Row(children: [Icon(Icons.access_time_rounded, size: 16.sp, color: AppColors.textGray500), SizedBox(width: 8.w), Text('10:00 AM - 12:00 PM', style: textTheme.bodySmall)]),
+          child: GestureDetector(
+            onTap: () => provider.selectTimeRange(context),
+            child: Container(
+              padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
+              decoration: BoxDecoration(
+                color: AppColors.backgroundGray.withOpacity(0.5),
+                borderRadius: BorderRadius.circular(10.r),
+                border: Border.all(color: AppColors.borderLight),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.calendar_month, size: 16.sp, color: AppColors.textGray500),
+                  SizedBox(width: 8.w),
+                  Expanded(
+                    child: Text(
+                      provider.formattedTime(context),
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStylesInApp.robotoBody(fontSize: 14.sp,fontWeight: FontWeight.w400,color: AppColors.textGray500),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
         ),
       ],
@@ -312,24 +723,35 @@ class _PostTaskScreenState extends State<PostTaskScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Amount', style: textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w700)),
+        Text('Amount', style: TextStylesInApp.soraHeader(fontSize: 12.sp,fontWeight: FontWeight.w500,color: AppColors.authNavy)),
         SizedBox(height: 8.h),
         TextField(
           controller: _budgetController,
+          keyboardType: TextInputType.number,
+          onChanged: (val) {
+            provider.updateBudget(double.tryParse(val) ?? 0.0);
+          },
           decoration: InputDecoration(
-            prefixIcon: Icon(Icons.attach_money_rounded, size: 20.sp, color: AppColors.textGray500),
+            prefixIcon: const Icon(Icons.attach_money_rounded),
             hintText: '100',
             filled: true,
-            fillColor: AppColors.backgroundGray.withValues(alpha: 0.5),
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12.r), borderSide: BorderSide.none),
+            fillColor: AppColors.backgroundGray.withOpacity(0.5),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12.r),
+              borderSide: BorderSide.none,
+            ),
           ),
         ),
         SizedBox(height: 8.h),
         Row(
           children: [
-            Icon(Icons.info_outline_rounded, size: 14.sp, color: AppColors.textGray500),
+            Icon(Icons.info_outline_rounded, size: 25.sp, color: AppColors.textGray500),
             SizedBox(width: 8.w),
-            Expanded(child: Text('Quotes may vary based on market rates and job requirements', style: textTheme.labelSmall?.copyWith(color: AppColors.textGray500))),
+            Expanded(
+              child: Text(
+                'Quotes may vary based on market rates and job requirements',
+                style: TextStylesInApp.robotoBody(fontWeight: FontWeight.w400,fontSize: 14.sp,color: AppColors.textGray500)),
+            ),
           ],
         ),
       ],
@@ -340,16 +762,47 @@ class _PostTaskScreenState extends State<PostTaskScreen> {
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton(
-        onPressed: () => _handleSubmit(provider),
-        style: ElevatedButton.styleFrom(backgroundColor: AppColors.authPurple, foregroundColor: Colors.white, padding: EdgeInsets.symmetric(vertical: 16.h), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)), elevation: 0),
-        child: const Text('Continue to Review', style: TextStyle(fontWeight: FontWeight.w700)),
+        onPressed: provider.isPosting ? null : () => _handleSubmit(provider),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: AppColors.authPurple,
+          foregroundColor: Colors.white,
+          padding: EdgeInsets.symmetric(vertical: 16.h),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
+          elevation: 0,
+        ),
+        child: provider.isPosting
+            ? const SizedBox(
+                height: 20,
+                width: 20,
+                child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+              )
+            :   Text('Continue to Review', style: TextStylesInApp.robotoBody(fontSize: 16.sp,color: Colors.white,fontWeight: FontWeight.w400)),
       ),
     );
   }
 
   Future<void> _handleSubmit(PostTaskProvider provider) async {
-    Navigator.push(context, MaterialPageRoute(builder: (context) => const PostTaskSuccessScreen()));
+    context.pushNamed('postTaskSuccess');
+    if (!provider.isValid) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please complete all required fields.')),
+      );
+      return;
+    }
+
+    final success = await provider.addJob(context);
+    if (success && mounted) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) =>   PostTaskSuccessScreen()),
+      );
+    } else if (provider.postError != null && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(provider.postError!)),
+      );
+    }
   }
+
 }
 
 class PostTaskSuccessScreen extends StatelessWidget {
@@ -359,81 +812,35 @@ class PostTaskSuccessScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
 
-    return Scaffold(
-      backgroundColor: AppColors.backgroundWhite,
-      body: Column(
-        children: [
-          AppGradientHeader(
-            height: 180.h,
-            showBack: true,
-            onBack: () => Navigator.pop(context),
-            child: Padding(
-              padding: EdgeInsets.fromLTRB(20.w, 0, 20.w, 40.h),
-              child: Text(
-                'Success',
-                style: textTheme.headlineSmall?.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w700,
-                  fontSize: 22.sp,
-                ),
+    return AuthScaffold(
+      headerTitle: 'Success',
+      showBack: true,
+      showLogo: false,
+      child: Container(
+        width: double.infinity,
+        padding: EdgeInsets.all(32.w),
+        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(24.r), boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 20, offset: const Offset(0, 10))]),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text('Your task is now live.', textAlign: TextAlign.center, style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700, color: AppColors.authNavy)),
+            SizedBox(height: 12.h),
+            Text('Nearby professionals will start sending quotes soon.', textAlign: TextAlign.center, style: textTheme.bodyMedium?.copyWith(color: AppColors.textGray500)),
+            SizedBox(height: 32.h),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () {
+                  context.read<PostTaskProvider>().reset();
+                  // Replace the Success screen with Matching Traders (no imperative Navigator calls)
+                  context.goNamed('matchingTraders', pathParameters: {'taskId': 'demo_task_id'});
+                },
+                style: ElevatedButton.styleFrom(backgroundColor: AppColors.authPurple, foregroundColor: Colors.white, padding: EdgeInsets.symmetric(vertical: 16.h), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)), elevation: 0),
+                child: const Text('View My Task', style: TextStyle(fontWeight: FontWeight.w700)),
               ),
             ),
-          ),
-          Expanded(
-            child: Transform.translate(
-              offset: Offset(0, -30.h),
-              child: Container(
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  color: AppColors.backgroundWhite,
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(30.r)),
-                ),
-                child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 24.w),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        'Your task is now live.',
-                        textAlign: TextAlign.center,
-                        style: textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.authNavy,
-                        ),
-                      ),
-                      SizedBox(height: 12.h),
-                      Text(
-                        'Nearby professionals will start sending quotes soon.',
-                        textAlign: TextAlign.center,
-                        style: textTheme.bodyMedium?.copyWith(
-                          color: AppColors.textGray500,
-                        ),
-                      ),
-                      SizedBox(height: 32.h),
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: () {
-                            context.read<PostTaskProvider>().reset();
-                            context.pushNamed('matchingTraders', pathParameters: {'taskId': 'demo_task_id'});
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.authPurple,
-                            foregroundColor: Colors.white,
-                            padding: EdgeInsets.symmetric(vertical: 16.h),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
-                            elevation: 0,
-                          ),
-                          child: const Text('View My Task', style: TextStyle(fontWeight: FontWeight.w700)),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

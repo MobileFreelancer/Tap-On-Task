@@ -39,8 +39,6 @@ class AuthService extends ChangeNotifier {
   bool get isTrader => _currentUser?.role == UserRole.trader;
   bool get firebaseReady => _firebaseReady;
 
-  bool get _useFirebaseAuth => _firebaseReady && ApiConfig.useFirebaseAuth;
-
   void _setLoading(bool v) {
     _isLoading = v;
     notifyListeners();
@@ -69,161 +67,33 @@ class AuthService extends ChangeNotifier {
   }
 
   Future<void> _onAuthStateChanged(User? firebaseUser) async {
-    if (firebaseUser == null && _currentUser != null) {
+    if (firebaseUser == null && _currentUser != null && ApiConfig.useFirebaseAuth) {
       _currentUser = null;
       notifyListeners();
     }
   }
 
-  Future<bool> tryAutoLogin() async {
-    _setLoading(true);
+  Future<void> _loadUserFromFirebase(User firebaseUser) async {
     try {
-      if (_firebaseReady) {
-        final firebaseUser = _firebaseAuth.currentUser;
-        if (firebaseUser != null) {
-          await _loadUserFromFirebase(firebaseUser);
-          _setLoading(false);
-          return _currentUser != null;
-        }
-      }
+      final storedUser = await _userFirestore.getUser(firebaseUser.uid);
+      final roleStr = await _storage.read(key: ApiConfig.storageKeyUserRole);
+      final role = storedUser?.role ??
+          (roleStr == 'trader' ? UserRole.trader : UserRole.customer);
 
-      final token = await _storage.read(key: ApiConfig.storageKeyAccessToken);
-      if (token == null || token.isEmpty) {
-        _setLoading(false);
-        return false;
-      }
-
-      if (ApiConfig.useMock) {
-        final roleStr = await _storage.read(key: ApiConfig.storageKeyUserRole);
-        _currentUser = roleStr == 'trader' ? MockData.defaultTrader : MockData.defaultCustomer;
-        _setLoading(false);
-        return true;
-      }
-
-      final userData = await _api.getProfile();
-      _currentUser = UserModel.fromJson(userData);
-      _setLoading(false);
-      return true;
-    } catch (e) {
-      await _clearStoredData();
-      _setLoading(false);
-      return false;
-    }
-  }
-
-  Future<bool> login({
-    required String phone,
-    required String password,
-    required UserRole role,
-  }) async {
-    _setLoading(true);
-    _setError(null);
-    try {
-      if (_useFirebaseAuth && phone.contains('@')) {
-        final credential = await _firebaseAuth.signInWithEmailAndPassword(
-          email: phone.trim(),
-          password: password,
-        );
-        return await _handleFirebaseUser(credential.user, role);
-      }
-
-      if (ApiConfig.useMock) {
-        await Future.delayed(const Duration(seconds: 1));
-        _currentUser = role == UserRole.trader ? MockData.defaultTrader : MockData.defaultCustomer;
-        await _storeAuthData(
-          accessToken: 'mock_access_token',
-          refreshToken: 'mock_refresh_token',
-          userId: _currentUser!.id,
-          role: role.name,
-        );
-        _setLoading(false);
-        return true;
-      }
-
-      final response = await _api.login(phone: phone, password: password);
-      await _storeAuthData(
-        accessToken: response['accessToken'] as String,
-        refreshToken: response['refreshToken'] as String,
-        userId: response['user']['id'] as String,
-        role: role.name,
+      _currentUser = UserModel(
+        id: firebaseUser.uid,
+        phoneNumber: storedUser?.phoneNumber ?? firebaseUser.phoneNumber ?? '',
+        name: firebaseUser.displayName ?? storedUser?.name ?? 'User',
+        email: firebaseUser.email ?? storedUser?.email,
+        role: role,
+        avatarUrl: firebaseUser.photoURL ?? storedUser?.avatarUrl,
+        isVerified: firebaseUser.emailVerified,
+        rating: storedUser?.rating ?? 0,
+        taskCount: storedUser?.taskCount ?? 0,
+        completedTasks: storedUser?.completedTasks ?? 0,
       );
-      _currentUser = UserModel.fromJson(response['user'] as Map<String, dynamic>);
-      _setLoading(false);
-      return true;
-    } on FirebaseAuthException catch (e) {
-      _setError(_mapFirebaseError(e));
-      _setLoading(false);
-      return false;
-    } on ApiException catch (e) {
-      _setError(e.message);
-      _setLoading(false);
-      return false;
-    } catch (e) {
-      _setError('Something went wrong. Please try again.');
-      _setLoading(false);
-      return false;
-    }
-  }
-
-  Future<bool> signup({
-    required String phone,
-    required String password,
-    required UserRole role,
-    String? name,
-    String? email,
-  }) async {
-    _setLoading(true);
-    _setError(null);
-    try {
-      if (_useFirebaseAuth && email != null && email.contains('@')) {
-        final credential = await _firebaseAuth.createUserWithEmailAndPassword(
-          email: email.trim(),
-          password: password,
-        );
-        if (name != null && name.isNotEmpty) {
-          await credential.user?.updateDisplayName(name);
-        }
-        return await _handleFirebaseUser(credential.user, role, name: name, phone: phone);
-      }
-
-      if (ApiConfig.useMock) {
-        await Future.delayed(const Duration(seconds: 1));
-        _currentUser = role == UserRole.trader ? MockData.defaultTrader : MockData.defaultCustomer;
-        if (name != null) _currentUser = _currentUser!.copyWith(name: name);
-        if (email != null) _currentUser = _currentUser!.copyWith(email: email);
-        await _storeAuthData(
-          accessToken: 'mock_access_token',
-          refreshToken: 'mock_refresh_token',
-          userId: _currentUser!.id,
-          role: role.name,
-        );
-        _setLoading(false);
-        return true;
-      }
-
-      final response = await _api.signup(phone: phone, password: password, role: role.name);
-      await _storeAuthData(
-        accessToken: response['accessToken'] as String,
-        refreshToken: response['refreshToken'] as String,
-        userId: response['user']['id'] as String,
-        role: role.name,
-      );
-      _currentUser = UserModel.fromJson(response['user'] as Map<String, dynamic>);
-      _setLoading(false);
-      return true;
-    } on FirebaseAuthException catch (e) {
-      _setError(_mapFirebaseError(e));
-      _setLoading(false);
-      return false;
-    } on ApiException catch (e) {
-      _setError(e.message);
-      _setLoading(false);
-      return false;
-    } catch (e) {
-      _setError('Something went wrong. Please try again.');
-      _setLoading(false);
-      return false;
-    }
+      notifyListeners();
+    } catch (_) {}
   }
 
   Future<bool> signInWithGoogle({UserRole? role}) async {
@@ -318,36 +188,6 @@ class AuthService extends ChangeNotifier {
     }
   }
 
-  Future<bool> sendPasswordResetEmail(String email) async {
-    _setLoading(true);
-    _setError(null);
-    try {
-      if (_firebaseReady) {
-        await _firebaseAuth.sendPasswordResetEmail(email: email.trim());
-        _setLoading(false);
-        return true;
-      }
-
-      if (ApiConfig.useMock) {
-        await Future.delayed(const Duration(seconds: 1));
-        _setLoading(false);
-        return true;
-      }
-
-      _setError('Password reset is unavailable.');
-      _setLoading(false);
-      return false;
-    } on FirebaseAuthException catch (e) {
-      _setError(_mapFirebaseError(e));
-      _setLoading(false);
-      return false;
-    } catch (e) {
-      _setError('Failed to send reset email.');
-      _setLoading(false);
-      return false;
-    }
-  }
-
   Future<bool> _handleFirebaseUser(
     User? firebaseUser,
     UserRole role, {
@@ -395,67 +235,6 @@ class AuthService extends ChangeNotifier {
     return true;
   }
 
-  Future<void> _loadUserFromFirebase(User firebaseUser) async {
-    try {
-      final storedUser = await _userFirestore.getUser(firebaseUser.uid);
-      final roleStr = await _storage.read(key: ApiConfig.storageKeyUserRole);
-      final role = storedUser?.role ??
-          (roleStr == 'trader' ? UserRole.trader : UserRole.customer);
-
-      _currentUser = UserModel(
-        id: firebaseUser.uid,
-        phoneNumber: storedUser?.phoneNumber ?? firebaseUser.phoneNumber ?? '',
-        name: firebaseUser.displayName ?? storedUser?.name ?? 'User',
-        email: firebaseUser.email ?? storedUser?.email,
-        role: role,
-        avatarUrl: firebaseUser.photoURL ?? storedUser?.avatarUrl,
-        isVerified: firebaseUser.emailVerified,
-        rating: storedUser?.rating ?? 0,
-        taskCount: storedUser?.taskCount ?? 0,
-        completedTasks: storedUser?.completedTasks ?? 0,
-      );
-      notifyListeners();
-    } catch (_) {}
-  }
-
-  Future<bool> verifyOtp({required String phone, required String otp}) async {
-    _setLoading(true);
-    _setError(null);
-    try {
-      if (ApiConfig.useMock || !_firebaseReady) {
-        await Future.delayed(const Duration(seconds: 1));
-        _setLoading(false);
-        return true;
-      }
-      await _api.verifyOtp(phone: phone, otp: otp);
-      _setLoading(false);
-      return true;
-    } on ApiException catch (e) {
-      _setError(e.message);
-      _setLoading(false);
-      return false;
-    } catch (e) {
-      _setError('Something went wrong. Please try again.');
-      _setLoading(false);
-      return false;
-    }
-  }
-
-  Future<void> logout() async {
-    _setLoading(true);
-    try {
-      if (!ApiConfig.useMock) await _api.logout();
-      await _googleSignIn.signOut();
-      if (_firebaseReady) await _firebaseAuth.signOut();
-    } catch (_) {
-    } finally {
-      await _clearStoredData();
-      _currentUser = null;
-      _setLoading(false);
-      notifyListeners();
-    }
-  }
-
   String _mapFirebaseError(FirebaseAuthException e) {
     switch (e.code) {
       case 'user-not-found':
@@ -479,6 +258,200 @@ class AuthService extends ChangeNotifier {
     }
   }
 
+  Future<bool> tryAutoLogin() async {
+    _setLoading(true);
+    try {
+      final token = await _storage.read(key: ApiConfig.storageKeyAccessToken);
+      if (token == null || token.isEmpty) {
+        _setLoading(false);
+        return false;
+      }
+
+      if (ApiConfig.useMock) {
+        final roleStr = await _storage.read(key: ApiConfig.storageKeyUserRole);
+        _currentUser = roleStr == 'trader' ? MockData.defaultTrader : MockData.defaultCustomer;
+        _setLoading(false);
+        return true;
+      }
+
+      final response = await _api.getProfile();
+      if (response['status'] == 'success') {
+        _currentUser = UserModel.fromJson(response['data'] as Map<String, dynamic>);
+        _setLoading(false);
+        return true;
+      }
+      _setLoading(false);
+      return false;
+    } catch (e) {
+      await _clearStoredData();
+      _setLoading(false);
+      return false;
+    }
+  }
+
+  Future<bool> login({
+    required String email,
+    required String password,
+  }) async {
+    _setLoading(true);
+    _setError(null);
+    try {
+
+      final response = await _api.login(email: email, password: password);
+      if (response['status'] == 'success') {
+        final data = response['data'] as Map<String, dynamic>;
+        await _storeAuthData(
+          accessToken: data['token'] as String,
+          refreshToken: '',
+          userId: data['id'].toString(),
+          role: data['role'] as String? ?? 'customer',
+        );
+        _currentUser = UserModel.fromJson(data);
+        _setLoading(false);
+        return true;
+      }
+      _setError(response['message'] as String? ?? 'Login failed');
+      _setLoading(false);
+      return false;
+    } on ApiException catch (e) {
+      _setError(e.message);
+      _setLoading(false);
+      return false;
+    } catch (e) {
+      _setError('Something went wrong. Please try again.');
+      _setLoading(false);
+      return false;
+    }
+  }
+
+  Future<String?> signup({
+    required String name,
+    required String email,
+    required String phone,
+    required String password,
+  }) async {
+    _setLoading(true);
+    _setError(null);
+    try {
+      if (ApiConfig.useMock) {
+        await Future.delayed(const Duration(seconds: 1));
+        _setLoading(false);
+        return "123456"; // Mock OTP
+      }
+
+      final response = await _api.signup(name: name, email: email, phone: phone, password: password);
+      if (response['status'] == 'success') {
+        _setLoading(false);
+        return response['data']['otp'].toString();
+      }
+      _setError(response['message'] as String? ?? 'Registration failed');
+      _setLoading(false);
+      return null;
+    } on ApiException catch (e) {
+      _setError(e.message);
+      _setLoading(false);
+      return null;
+    } catch (e) {
+      _setError('Something went wrong. Please try again.');
+      _setLoading(false);
+      return null;
+    }
+  }
+
+  Future<bool> verifyOtp({required String email, required String otp}) async {
+    _setLoading(true);
+    _setError(null);
+    try {
+      if (ApiConfig.useMock) {
+        await Future.delayed(const Duration(seconds: 1));
+        _currentUser = MockData.defaultCustomer;
+        _setLoading(false);
+        return true;
+      }
+      final response = await _api.verifyOtp(email: email, otp: otp);
+      if (response['status'] == 'success') {
+        final data = response['data'] as Map<String, dynamic>;
+        await _storeAuthData(
+          accessToken: data['token'] as String,
+          refreshToken: '',
+          userId: data['id'].toString(),
+          role: data['role'] as String? ?? 'customer',
+        );
+        _currentUser = UserModel.fromJson(data);
+        _setLoading(false);
+        return true;
+      }
+      _setError(response['message'] as String? ?? 'Verification failed');
+      _setLoading(false);
+      return false;
+    } on ApiException catch (e) {
+      _setError(e.message);
+      _setLoading(false);
+      return false;
+    } catch (e) {
+      _setError('Something went wrong. Please try again.');
+      _setLoading(false);
+      return false;
+    }
+  }
+
+  Future<String?> forgotPassword(String emailOrPhone) async {
+    _setLoading(true);
+    _setError(null);
+    try {
+      if (ApiConfig.useMock) {
+        await Future.delayed(const Duration(seconds: 1));
+        _setLoading(false);
+        return "654321";
+      }
+      final response = await _api.forgotPassword(emailOrPhone);
+      if (response['status'] == 'success') {
+        _setLoading(false);
+        return response['data']['otp'].toString();
+      }
+      _setError(response['message'] as String? ?? 'Failed to send OTP');
+      _setLoading(false);
+      return null;
+    } on ApiException catch (e) {
+      _setError(e.message);
+      _setLoading(false);
+      return null;
+    } catch (e) {
+      _setError('Something went wrong.');
+      _setLoading(false);
+      return null;
+    }
+  }
+
+  Future<String?> resendResetOtp(String emailOrPhone) async {
+    _setError(null);
+    try {
+      final response = await _api.resendResetOtp(emailOrPhone);
+      if (response['status'] == 'success') {
+        return response['data']['otp'].toString();
+      }
+      _setError(response['message'] as String? ?? 'Failed to resend OTP');
+      return null;
+    } on ApiException catch (e) {
+      _setError(e.message);
+      return null;
+    } catch (e) {
+      _setError('Something went wrong.');
+      return null;
+    }
+  }
+
+  Future<void> logout() async {
+    _setLoading(true);
+    try {
+      await _storage.deleteAll();
+      _currentUser = null;
+    } finally {
+      _setLoading(false);
+      notifyListeners();
+    }
+  }
+
   Future<void> _storeAuthData({
     required String accessToken,
     required String refreshToken,
@@ -493,10 +466,6 @@ class AuthService extends ChangeNotifier {
   }
 
   Future<void> _clearStoredData() async {
-    await _storage.delete(key: ApiConfig.storageKeyAccessToken);
-    await _storage.delete(key: ApiConfig.storageKeyRefreshToken);
-    await _storage.delete(key: ApiConfig.storageKeyUserID);
-    await _storage.delete(key: ApiConfig.storageKeyUserRole);
-    await _storage.delete(key: ApiConfig.storageKeyIsLoggedIn);
+    await _storage.deleteAll();
   }
 }

@@ -1,18 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/models/booking_model.dart';
 import '../../../core/models/task_model.dart';
 import '../../../core/services/app_services.dart';
+import '../../../core/services/stripe_payment_service.dart';
+import '../../../core/theme/text_styles.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/widgets/app_gradient_header.dart';
+import '../../../core/widgets/app_header.dart';
 import '../../../core/widgets/empty_state.dart';
 import '../../../core/widgets/image_placeholder.dart';
-import '../../../core/widgets/app_header.dart';
-import '../../../core/theme/text_styles.dart';
 import '../../../generated/assets.dart';
 import '../../customer/providers/post_task_provider.dart';
 
@@ -41,90 +42,50 @@ class _QuotesScreenState extends State<QuotesScreen> {
 
     return Scaffold(
       backgroundColor: AppColors.backgroundWhite,
-      body: CustomScrollView(
-        slivers: [
-          SliverToBoxAdapter(
-            child: AppGradientHeader(
-              height: 160.h,
-              child: Container(
-                padding: EdgeInsets.fromLTRB(20.w, MediaQuery.paddingOf(context).top + 10.h, 20.w, 20.h),
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: GestureDetector(
-                        onTap: () => context.pop(),
-                        child: Container(
-                          width: 40.w,
-                          height: 40.w,
-                          decoration: const BoxDecoration(
-                            color: Colors.white,
-                            shape: BoxShape.circle,
-                          ),
-                          child: Icon(Icons.chevron_left_rounded, color: AppColors.authPurple, size: 24.sp),
-                        ),
-                      ),
-                    ),
-                    Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          'Quotes (${bookingService.quotes.length})',
-                          style: textTheme.headlineSmall?.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w700,
-                            fontSize: 20.sp,
-                          ),
-                        ),
-                        SizedBox(height: 4.h),
-                        Text(
-                          'Compare Quotes and choose the best trader',
-                          style: textTheme.bodyMedium?.copyWith(
-                            color: Colors.white.withOpacity(0.9),
-                            fontSize: 12.sp,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
+      body: Column(
+        children: [
+          AppGradientHeader(
+            height: 180.h,
+            showBack: true,
+            title:  'Quotes (${bookingService.quotes.length})',
+            subTitle:  'Compare Quotes and choose the best trader',
+            onBack: () => context.canPop() ? context.pop() : context.go('/customer/dashboard'),
           ),
-          SliverToBoxAdapter(
+          Expanded(
             child: Transform.translate(
               offset: Offset(0, -30.h),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: AppColors.backgroundWhite,
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(30.r)),
-                ),
-                padding: EdgeInsets.fromLTRB(20.w, 24.h, 20.w, 24.h),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildTaskSummaryCard(textTheme, postTaskProvider),
-                    SizedBox(height: 24.h),
-                    bookingService.isLoading
-                        ? const Center(child: CircularProgressIndicator())
-                        : bookingService.quotes.isEmpty
-                        ? const EmptyState(
-                      icon: Icons.request_quote_rounded,
-                      title: 'No quotes yet',
-                      subtitle: 'Providers will send quotes for your task soon.',
-                    )
-                        : ListView.separated(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: bookingService.quotes.length,
-                      separatorBuilder: (_, __) => SizedBox(height: 16.h),
-                      itemBuilder: (_, i) {
-                        final quote = bookingService.quotes[i];
-                        return _buildQuoteCard(quote, textTheme, bookingService);
-                      },
-                    ),
-                  ],
+              child: SingleChildScrollView(
+                child: Container(
+                  padding: EdgeInsets.fromLTRB(20.w, 24.h, 20.w, 24.h),
+                  decoration: BoxDecoration(
+                    color: AppColors.backgroundWhite,
+                    borderRadius: BorderRadius.vertical(top: Radius.circular(30.r)),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildTaskSummaryCard(textTheme, postTaskProvider),
+                      SizedBox(height: 24.h),
+                      bookingService.isLoading
+                          ? const Center(child: CircularProgressIndicator())
+                          : bookingService.quotes.isEmpty
+                          ? const EmptyState(
+                        icon: Icons.request_quote_rounded,
+                        title: 'No quotes yet',
+                        subtitle: 'Providers will send quotes for your task soon.',
+                      )
+                          : ListView.separated(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: bookingService.quotes.length,
+                        separatorBuilder: (_, __) => SizedBox(height: 16.h),
+                        itemBuilder: (_, i) {
+                          final quote = bookingService.quotes[i];
+                          return _buildQuoteCard(quote, textTheme, bookingService);
+                        },
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -554,6 +515,38 @@ class PaymentScreen extends StatefulWidget {
 
 class _PaymentScreenState extends State<PaymentScreen> {
   String _selectedMethod = 'visa';
+  bool _isPaying = false;
+
+  Future<void> _onPayPressed(double totalAmount) async {
+    if (_isPaying) return;
+
+    setState(() => _isPaying = true);
+
+    final outcome = await context.read<PaymentService>().processPayment(
+          amount: totalAmount,
+          bookingId: widget.bookingId,
+          currency: 'cad',
+        );
+
+    if (!mounted) return;
+    setState(() => _isPaying = false);
+
+    switch (outcome.status) {
+      case StripePaymentStatus.success:
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Payment successful!')),
+        );
+        context.go('/customer/dashboard');
+      case StripePaymentStatus.cancelled:
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Payment cancelled')),
+        );
+      case StripePaymentStatus.failed:
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(outcome.message)),
+        );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -970,15 +963,15 @@ class _PaymentScreenState extends State<PaymentScreen> {
               ),
               child: isSelected
                   ? Center(
-                      child: Container(
-                        width: 10.w,
-                        height: 10.h,
-                        decoration: const BoxDecoration(
-                          color: AppColors.primaryPurple,
-                          shape: BoxShape.circle,
-                        ),
-                      ),
-                    )
+                child: Container(
+                  width: 10.w,
+                  height: 10.h,
+                  decoration: const BoxDecoration(
+                    color: AppColors.primaryPurple,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+              )
                   : null,
             ),
             SizedBox(width: 12.w),
@@ -1098,15 +1091,15 @@ class _PaymentScreenState extends State<PaymentScreen> {
               ),
               child: isSelected
                   ? Center(
-                      child: Container(
-                        width: 10.w,
-                        height: 10.h,
-                        decoration: const BoxDecoration(
-                          color: AppColors.primaryPurple,
-                          shape: BoxShape.circle,
-                        ),
-                      ),
-                    )
+                child: Container(
+                  width: 10.w,
+                  height: 10.h,
+                  decoration: const BoxDecoration(
+                    color: AppColors.primaryPurple,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+              )
                   : null,
             ),
             SizedBox(width: 12.w),
@@ -1164,15 +1157,15 @@ class _PaymentScreenState extends State<PaymentScreen> {
               ),
               child: isSelected
                   ? Center(
-                      child: Container(
-                        width: 10.w,
-                        height: 10.h,
-                        decoration: const BoxDecoration(
-                          color: AppColors.primaryPurple,
-                          shape: BoxShape.circle,
-                        ),
-                      ),
-                    )
+                child: Container(
+                  width: 10.w,
+                  height: 10.h,
+                  decoration: const BoxDecoration(
+                    color: AppColors.primaryPurple,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+              )
                   : null,
             ),
             SizedBox(width: 12.w),
@@ -1264,27 +1257,32 @@ class _PaymentScreenState extends State<PaymentScreen> {
       width: double.infinity,
       height: 48.h,
       child: ElevatedButton(
-        onPressed: () {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Payment successful!')),
-          );
-          context.go('/customer/dashboard');
-        },
+        onPressed: _isPaying ? null : () => _onPayPressed(totalAmount),
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primaryPurple,
+          disabledBackgroundColor: AppColors.primaryPurple.withOpacity(0.6),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10.r),
           ),
           elevation: 0,
         ),
-        child: Text(
-          "Pay CAD ${totalAmount.toStringAsFixed(2)}",
-          style: TextStylesInApp.robotoBody(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-            fontSize: 16.sp,
-          ),
-        ),
+        child: _isPaying
+            ? SizedBox(
+                width: 22.w,
+                height: 22.w,
+                child: const CircularProgressIndicator(
+                  strokeWidth: 2.5,
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                ),
+              )
+            : Text(
+                "Pay CAD ${totalAmount.toStringAsFixed(2)}",
+                style: TextStylesInApp.robotoBody(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16.sp,
+                ),
+              ),
       ),
     );
   }
@@ -1317,87 +1315,87 @@ class _WalletScreenState extends State<WalletScreen> {
       body: paymentService.isLoading
           ? const Center(child: CircularProgressIndicator())
           : ListView(
-              padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(20),
+        children: [
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [AppColors.primaryPurple, AppColors.primaryDark],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Available Balance', style: TextStyle(color: Colors.white.withValues(alpha: 0.8), fontSize: 14)),
+                const SizedBox(height: 8),
+                Text(
+                  Formatters.formatCurrency(wallet?.balance ?? 0),
+                  style: const TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: () {},
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    foregroundColor: AppColors.primaryPurple,
+                  ),
+                  child: const Text('Top Up'),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 24),
+          const Text('Transaction History', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+          const SizedBox(height: 12),
+          ...(wallet?.transactions ?? []).map((txn) => Container(
+            margin: const EdgeInsets.only(bottom: 10),
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: AppColors.backgroundWhite,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: AppColors.borderLight),
+            ),
+            child: Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.all(24),
+                  width: 40,
+                  height: 40,
                   decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [AppColors.primaryPurple, AppColors.primaryDark],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    borderRadius: BorderRadius.circular(20),
+                    color: (txn.type == TransactionType.credit ? AppColors.surfaceGreen : AppColors.surfaceRed),
+                    borderRadius: BorderRadius.circular(10),
                   ),
+                  child: Icon(
+                    txn.type == TransactionType.credit ? Icons.arrow_downward_rounded : Icons.arrow_upward_rounded,
+                    color: txn.type == TransactionType.credit ? AppColors.accentGreen : AppColors.error,
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Available Balance', style: TextStyle(color: Colors.white.withValues(alpha: 0.8), fontSize: 14)),
-                      const SizedBox(height: 8),
-                      Text(
-                        Formatters.formatCurrency(wallet?.balance ?? 0),
-                        style: const TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold),
-                      ),
-                      const SizedBox(height: 16),
-                      ElevatedButton(
-                        onPressed: () {},
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          foregroundColor: AppColors.primaryPurple,
-                        ),
-                        child: const Text('Top Up'),
-                      ),
+                      Text(txn.title, style: const TextStyle(fontWeight: FontWeight.w500)),
+                      Text(txn.createdAt.timeAgo, style: const TextStyle(fontSize: 12, color: AppColors.textGray400)),
                     ],
                   ),
                 ),
-                const SizedBox(height: 24),
-                const Text('Transaction History', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-                const SizedBox(height: 12),
-                ...(wallet?.transactions ?? []).map((txn) => Container(
-                      margin: const EdgeInsets.only(bottom: 10),
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: AppColors.backgroundWhite,
-                        borderRadius: BorderRadius.circular(14),
-                        border: Border.all(color: AppColors.borderLight),
-                      ),
-                      child: Row(
-                        children: [
-                          Container(
-                            width: 40,
-                            height: 40,
-                            decoration: BoxDecoration(
-                              color: (txn.type == TransactionType.credit ? AppColors.surfaceGreen : AppColors.surfaceRed),
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: Icon(
-                              txn.type == TransactionType.credit ? Icons.arrow_downward_rounded : Icons.arrow_upward_rounded,
-                              color: txn.type == TransactionType.credit ? AppColors.accentGreen : AppColors.error,
-                              size: 20,
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(txn.title, style: const TextStyle(fontWeight: FontWeight.w500)),
-                                Text(txn.createdAt.timeAgo, style: const TextStyle(fontSize: 12, color: AppColors.textGray400)),
-                              ],
-                            ),
-                          ),
-                          Text(
-                            '${txn.type == TransactionType.credit ? '+' : '-'}${Formatters.formatCurrency(txn.amount)}',
-                            style: TextStyle(
-                              fontWeight: FontWeight.w600,
-                              color: txn.type == TransactionType.credit ? AppColors.accentGreen : AppColors.error,
-                            ),
-                          ),
-                        ],
-                      ),
-                    )),
+                Text(
+                  '${txn.type == TransactionType.credit ? '+' : '-'}${Formatters.formatCurrency(txn.amount)}',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    color: txn.type == TransactionType.credit ? AppColors.accentGreen : AppColors.error,
+                  ),
+                ),
               ],
             ),
+          )),
+        ],
+      ),
     );
   }
 }
@@ -1428,120 +1426,60 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       body: notifService.isLoading
           ? const Center(child: CircularProgressIndicator())
           : notifService.notifications.isEmpty
-              ? const EmptyState(icon: Icons.notifications_none_rounded, title: 'No notifications', subtitle: 'You\'re all caught up!')
-              : ListView.builder(
-                  padding: const EdgeInsets.all(20),
-                  itemCount: notifService.notifications.length,
-                  itemBuilder: (_, i) {
-                    final notif = notifService.notifications[i];
-                    return GestureDetector(
-                      onTap: () => notifService.markAsRead(notif.id),
-                      child: Container(
-                        margin: const EdgeInsets.only(bottom: 10),
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: notif.isRead ? AppColors.backgroundWhite : AppColors.primarySurface.withValues(alpha: 0.3),
-                          borderRadius: BorderRadius.circular(14),
-                          border: Border.all(color: AppColors.borderLight),
-                        ),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Container(
-                              width: 40,
-                              height: 40,
-                              decoration: BoxDecoration(
-                                color: AppColors.primarySurface,
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: const Icon(Icons.notifications_rounded, color: AppColors.primaryPurple, size: 20),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(notif.title, style: TextStyle(fontWeight: notif.isRead ? FontWeight.w500 : FontWeight.w600)),
-                                  const SizedBox(height: 4),
-                                  Text(notif.body, style: const TextStyle(fontSize: 13, color: AppColors.textGray500)),
-                                  const SizedBox(height: 4),
-                                  Text(notif.createdAt.timeAgo, style: const TextStyle(fontSize: 11, color: AppColors.textGray400)),
-                                ],
-                              ),
-                            ),
-                            if (!notif.isRead)
-                              Container(width: 8, height: 8, decoration: const BoxDecoration(color: AppColors.primaryPurple, shape: BoxShape.circle)),
-                          ],
-                        ),
-                      ),
-                    );
-                  },
-                ),
-    );
-  }
-}
-
-class HelpSupportScreen extends StatefulWidget {
-  const HelpSupportScreen({super.key});
-
-  @override
-  State<HelpSupportScreen> createState() => _HelpSupportScreenState();
-}
-
-class _HelpSupportScreenState extends State<HelpSupportScreen> {
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<NotificationService>().fetchFaqs();
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final faqs = context.watch<NotificationService>().faqs;
-    final categories = faqs.map((f) => f.category).toSet().toList();
-
-    return Scaffold(
-      backgroundColor: AppColors.backgroundOffWhite,
-      appBar: AppBar(title: const Text('Help & Support')),
-      body: ListView(
+          ? const EmptyState(icon: Icons.notifications_none_rounded, title: 'No notifications', subtitle: 'You\'re all caught up!')
+          : ListView.builder(
         padding: const EdgeInsets.all(20),
-        children: [
-          TextField(
-            decoration: InputDecoration(
-              hintText: 'Search for help...',
-              prefixIcon: const Icon(Icons.search_rounded),
-              filled: true,
-              fillColor: AppColors.backgroundWhite,
-            ),
-          ),
-          const SizedBox(height: 24),
-          ...categories.map((cat) {
-            final catFaqs = faqs.where((f) => f.category == cat).toList();
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(cat, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-                const SizedBox(height: 8),
-                ...catFaqs.map((faq) => ExpansionTile(
-                      title: Text(faq.question, style: const TextStyle(fontSize: 14)),
+        itemCount: notifService.notifications.length,
+        itemBuilder: (_, i) {
+          final notif = notifService.notifications[i];
+          return GestureDetector(
+            onTap: () => notifService.markAsRead(notif.id),
+            child: Container(
+              margin: const EdgeInsets.only(bottom: 10),
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: notif.isRead ? AppColors.backgroundWhite : AppColors.primarySurface.withValues(alpha: 0.3),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: AppColors.borderLight),
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: AppColors.primarySurface,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: const Icon(Icons.notifications_rounded, color: AppColors.primaryPurple, size: 20),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                          child: Text(faq.answer, style: const TextStyle(fontSize: 13, color: AppColors.textGray600, height: 1.5)),
-                        ),
+                        Text(notif.title, style: TextStyle(fontWeight: notif.isRead ? FontWeight.w500 : FontWeight.w600)),
+                        const SizedBox(height: 4),
+                        Text(notif.body, style: const TextStyle(fontSize: 13, color: AppColors.textGray500)),
+                        const SizedBox(height: 4),
+                        Text(notif.createdAt.timeAgo, style: const TextStyle(fontSize: 11, color: AppColors.textGray400)),
                       ],
-                    )),
-                const SizedBox(height: 16),
-              ],
-            );
-          }),
-        ],
+                    ),
+                  ),
+                  if (!notif.isRead)
+                    Container(width: 8, height: 8, decoration: const BoxDecoration(color: AppColors.primaryPurple, shape: BoxShape.circle)),
+                ],
+              ),
+            ),
+          );
+        },
       ),
     );
   }
 }
+
+
 
 class MessagesScreen extends StatelessWidget {
   const MessagesScreen({super.key});
@@ -1559,3 +1497,4 @@ class MessagesScreen extends StatelessWidget {
     );
   }
 }
+

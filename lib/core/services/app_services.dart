@@ -4,8 +4,10 @@ import '../models/service_model.dart';
 import '../models/booking_model.dart';
 import '../models/notification_model.dart';
 import '../models/task_model.dart';
+import '../models/api_job_model.dart';
 import 'api_service.dart';
 import 'app_mock_data.dart';
+import 'stripe_payment_service.dart';
 
 class HomeService extends ChangeNotifier {
   static final HomeService _instance = HomeService._internal();
@@ -19,6 +21,7 @@ class HomeService extends ChangeNotifier {
   List<ServiceModel> _popularServices = [];
   List<ProviderModel> _nearbyProviders = [];
   List<BookingModel> _recentBookings = [];
+  List<ApiJobModel> _apiJobs = [];
   bool _isLoading = false;
   String? _error;
 
@@ -27,6 +30,7 @@ class HomeService extends ChangeNotifier {
   List<ServiceModel> get popularServices => _popularServices;
   List<ProviderModel> get nearbyProviders => _nearbyProviders;
   List<BookingModel> get recentBookings => _recentBookings;
+  List<ApiJobModel> get apiJobs => _apiJobs;
   bool get isLoading => _isLoading;
   String? get error => _error;
 
@@ -36,37 +40,18 @@ class HomeService extends ChangeNotifier {
     notifyListeners();
 
     try {
-      if (ApiConfig.useMock) {
-        await Future.delayed(const Duration(milliseconds: 600));
-        _banners = AppMockData.banners;
-        _categories = AppMockData.categories;
-        _popularServices = AppMockData.services;
-        _nearbyProviders = AppMockData.providers;
-        _recentBookings = AppMockData.bookings;
-      } else {
-        final response = await _api.get('/home');
-        final data = response.data as Map<String, dynamic>;
-        _banners = (data['banners'] as List<dynamic>?)
-                ?.map((e) => BannerModel.fromJson(e as Map<String, dynamic>))
-                .toList() ??
-            [];
-        _categories = (data['categories'] as List<dynamic>?)
-                ?.map((e) => ServiceCategoryModel.fromJson(e as Map<String, dynamic>))
-                .toList() ??
-            [];
-        _popularServices = (data['popularServices'] as List<dynamic>?)
-                ?.map((e) => ServiceModel.fromJson(e as Map<String, dynamic>))
-                .toList() ??
-            [];
-        _recentBookings = (data['recentBookings'] as List<dynamic>?)
-                ?.map((e) => BookingModel.fromJson(e as Map<String, dynamic>))
-                .toList() ??
-            [];
-      }
-    } on ApiException catch (e) {
-      _error = e.message;
-    } catch (_) {
-      _error = 'Failed to load home data.';
+      // Fetch dynamic jobs from API
+      _apiJobs = await _api.getJobList(filter: 'active');
+
+      // Mock data for other sections as API is not ready
+      await Future.delayed(const Duration(milliseconds: 600));
+      _banners = AppMockData.banners;
+      _categories = AppMockData.categories;
+      _popularServices = AppMockData.services;
+      _nearbyProviders = AppMockData.providers;
+      _recentBookings = AppMockData.bookings;
+    } catch (e) {
+      _error = 'Failed to load home data: $e';
     }
 
     _isLoading = false;
@@ -117,28 +102,14 @@ class SearchService extends ChangeNotifier {
     notifyListeners();
 
     try {
-      if (ApiConfig.useMock) {
-        await Future.delayed(const Duration(milliseconds: 400));
-        _results = AppMockData.searchServices(query);
-        _providerResults = AppMockData.searchProviders(query);
-        if (!_recentSearches.contains(query)) {
-          _recentSearches.insert(0, query);
-          if (_recentSearches.length > 5) _recentSearches.removeLast();
-        }
-      } else {
-        final response = await _api.get('/search', queryParams: {'q': query});
-        final data = response.data as Map<String, dynamic>;
-        _results = (data['services'] as List<dynamic>?)
-                ?.map((e) => ServiceModel.fromJson(e as Map<String, dynamic>))
-                .toList() ??
-            [];
-        _providerResults = (data['providers'] as List<dynamic>?)
-                ?.map((e) => ProviderModel.fromJson(e as Map<String, dynamic>))
-                .toList() ??
-            [];
+      // Force mock for search as API is not ready
+      await Future.delayed(const Duration(milliseconds: 400));
+      _results = AppMockData.searchServices(query);
+      _providerResults = AppMockData.searchProviders(query);
+      if (!_recentSearches.contains(query)) {
+        _recentSearches.insert(0, query);
+        if (_recentSearches.length > 5) _recentSearches.removeLast();
       }
-    } on ApiException catch (e) {
-      _error = e.message;
     } catch (_) {
       _error = 'Search failed.';
     }
@@ -155,45 +126,27 @@ class SearchService extends ChangeNotifier {
   }
 
   Future<List<ServiceModel>> getServicesByCategory(String categoryId) async {
-    if (ApiConfig.useMock) {
-      await Future.delayed(const Duration(milliseconds: 300));
-      return AppMockData.getServicesByCategory(categoryId);
-    }
-    final response = await _api.get('/services', queryParams: {'category': categoryId});
-    return (response.data['services'] as List<dynamic>?)
-            ?.map((e) => ServiceModel.fromJson(e as Map<String, dynamic>))
-            .toList() ??
-        [];
+    // Force mock
+    await Future.delayed(const Duration(milliseconds: 300));
+    return AppMockData.getServicesByCategory(categoryId);
   }
 
   Future<List<ProviderModel>> getProvidersByCategory(String categoryId) async {
-    if (ApiConfig.useMock) {
-      await Future.delayed(const Duration(milliseconds: 300));
-      return AppMockData.getProvidersByCategory(categoryId);
-    }
-    final response = await _api.get('/providers', queryParams: {'category': categoryId});
-    return (response.data['providers'] as List<dynamic>?)
-            ?.map((e) => ProviderModel.fromJson(e as Map<String, dynamic>))
-            .toList() ??
-        [];
+    // Force mock
+    await Future.delayed(const Duration(milliseconds: 300));
+    return AppMockData.getProvidersByCategory(categoryId);
   }
 
   Future<ServiceModel?> getServiceById(String id) async {
-    if (ApiConfig.useMock) {
-      await Future.delayed(const Duration(milliseconds: 200));
-      return AppMockData.getServiceById(id);
-    }
-    final response = await _api.get('/services/$id');
-    return ServiceModel.fromJson(response.data as Map<String, dynamic>);
+    // Force mock
+    await Future.delayed(const Duration(milliseconds: 200));
+    return AppMockData.getServiceById(id);
   }
 
   Future<ProviderModel?> getProviderById(String id) async {
-    if (ApiConfig.useMock) {
-      await Future.delayed(const Duration(milliseconds: 200));
-      return AppMockData.getProviderById(id);
-    }
-    final response = await _api.get('/providers/$id');
-    return ProviderModel.fromJson(response.data as Map<String, dynamic>);
+    // Force mock
+    await Future.delayed(const Duration(milliseconds: 200));
+    return AppMockData.getProviderById(id);
   }
 }
 
@@ -220,18 +173,9 @@ class BookingService extends ChangeNotifier {
     notifyListeners();
 
     try {
-      if (ApiConfig.useMock) {
-        await Future.delayed(const Duration(milliseconds: 500));
-        _bookings = AppMockData.bookings;
-      } else {
-        final response = await _api.get('/bookings');
-        _bookings = (response.data['bookings'] as List<dynamic>?)
-                ?.map((e) => BookingModel.fromJson(e as Map<String, dynamic>))
-                .toList() ??
-            [];
-      }
-    } on ApiException catch (e) {
-      _error = e.message;
+      // Force mock
+      await Future.delayed(const Duration(milliseconds: 500));
+      _bookings = AppMockData.bookings;
     } catch (_) {
       _error = 'Failed to load bookings.';
     }
@@ -246,18 +190,9 @@ class BookingService extends ChangeNotifier {
     notifyListeners();
 
     try {
-      if (ApiConfig.useMock) {
-        await Future.delayed(const Duration(milliseconds: 400));
-        _quotes = AppMockData.quotes.where((q) => q.taskId == taskId).toList();
-      } else {
-        final response = await _api.get('/tasks/$taskId/bids');
-        _quotes = (response.data['bids'] as List<dynamic>?)
-                ?.map((e) => TaskBidModel.fromJson(e as Map<String, dynamic>))
-                .toList() ??
-            [];
-      }
-    } on ApiException catch (e) {
-      _error = e.message;
+      // Force mock
+      await Future.delayed(const Duration(milliseconds: 400));
+      _quotes = AppMockData.quotes.where((q) => q.taskId == taskId).toList();
     } catch (_) {
       _error = 'Failed to load quotes.';
     }
@@ -268,11 +203,8 @@ class BookingService extends ChangeNotifier {
 
   Future<bool> acceptQuote(String taskId, String bidId) async {
     try {
-      if (ApiConfig.useMock) {
-        await Future.delayed(const Duration(seconds: 1));
-        return true;
-      }
-      await _api.acceptBid(taskId, bidId);
+      // Force mock
+      await Future.delayed(const Duration(seconds: 1));
       return true;
     } catch (_) {
       _error = 'Failed to accept quote.';
@@ -296,44 +228,23 @@ class BookingService extends ChangeNotifier {
     notifyListeners();
 
     try {
-      if (ApiConfig.useMock) {
-        await Future.delayed(const Duration(seconds: 1));
-        final booking = BookingModel(
-          id: 'book${DateTime.now().millisecondsSinceEpoch}',
-          taskId: 'task${DateTime.now().millisecondsSinceEpoch}',
-          serviceId: serviceId,
-          providerId: providerId,
-          title: title,
-          status: 'pending',
-          scheduledAt: scheduledAt,
-          location: location,
-          amount: amount,
-        );
-        _bookings.insert(0, booking);
-        _isLoading = false;
-        notifyListeners();
-        return true;
-      }
-
-      await _api.post('/bookings', data: {
-        'title': title,
-        'description': description,
-        'categoryId': categoryId,
-        'amount': amount,
-        'location': location,
-        'scheduledAt': scheduledAt.toIso8601String(),
-        'serviceId': serviceId,
-        'providerId': providerId,
-      });
-      await fetchBookings();
+      // Force mock
+      await Future.delayed(const Duration(seconds: 1));
+      final booking = BookingModel(
+        id: 'book${DateTime.now().millisecondsSinceEpoch}',
+        taskId: 'task${DateTime.now().millisecondsSinceEpoch}',
+        serviceId: serviceId,
+        providerId: providerId,
+        title: title,
+        status: 'pending',
+        scheduledAt: scheduledAt,
+        location: location,
+        amount: amount,
+      );
+      _bookings.insert(0, booking);
       _isLoading = false;
       notifyListeners();
       return true;
-    } on ApiException catch (e) {
-      _error = e.message;
-      _isLoading = false;
-      notifyListeners();
-      return false;
     } catch (_) {
       _error = 'Failed to create booking.';
       _isLoading = false;
@@ -367,15 +278,9 @@ class PaymentService extends ChangeNotifier {
     notifyListeners();
 
     try {
-      if (ApiConfig.useMock) {
-        await Future.delayed(const Duration(milliseconds: 400));
-        _wallet = AppMockData.wallet;
-      } else {
-        final response = await _api.get('/wallet');
-        _wallet = WalletModel.fromJson(response.data as Map<String, dynamic>);
-      }
-    } on ApiException catch (e) {
-      _error = e.message;
+      // Force mock
+      await Future.delayed(const Duration(milliseconds: 400));
+      _wallet = AppMockData.wallet;
     } catch (_) {
       _error = 'Failed to load wallet.';
     }
@@ -386,20 +291,13 @@ class PaymentService extends ChangeNotifier {
 
   Future<void> fetchPaymentMethods() async {
     try {
-      if (ApiConfig.useMock) {
-        await Future.delayed(const Duration(milliseconds: 300));
-        _paymentMethods = AppMockData.paymentMethods;
-        _selectedMethod = _paymentMethods.firstWhere(
-          (m) => m.isDefault,
-          orElse: () => _paymentMethods.first,
-        );
-      } else {
-        final response = await _api.get('/payments/methods');
-        _paymentMethods = (response.data['methods'] as List<dynamic>?)
-                ?.map((e) => PaymentMethodModel.fromJson(e as Map<String, dynamic>))
-                .toList() ??
-            [];
-      }
+      // Force mock
+      await Future.delayed(const Duration(milliseconds: 300));
+      _paymentMethods = AppMockData.paymentMethods;
+      _selectedMethod = _paymentMethods.firstWhere(
+        (m) => m.isDefault,
+        orElse: () => _paymentMethods.first,
+      );
       notifyListeners();
     } catch (_) {}
   }
@@ -409,41 +307,33 @@ class PaymentService extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<bool> processPayment({
+  Map<String, dynamic>? _lastPaymentResponse;
+  Map<String, dynamic>? get lastPaymentResponse => _lastPaymentResponse;
+
+  Future<StripePaymentOutcome> processPayment({
     required double amount,
     required String bookingId,
+    String currency = 'cad',
   }) async {
     _isLoading = true;
     _error = null;
+    _lastPaymentResponse = null;
     notifyListeners();
 
-    try {
-      if (ApiConfig.useMock) {
-        await Future.delayed(const Duration(seconds: 2));
-        _isLoading = false;
-        notifyListeners();
-        return true;
-      }
+    final outcome = await StripePaymentService.instance.pay(
+      amount: amount,
+      bookingId: bookingId,
+      currency: currency,
+    );
 
-      await _api.post('/payments/process', data: {
-        'amount': amount,
-        'bookingId': bookingId,
-        'methodId': _selectedMethod?.id,
-      });
-      _isLoading = false;
-      notifyListeners();
-      return true;
-    } on ApiException catch (e) {
-      _error = e.message;
-      _isLoading = false;
-      notifyListeners();
-      return false;
-    } catch (_) {
-      _error = 'Payment failed.';
-      _isLoading = false;
-      notifyListeners();
-      return false;
+    _lastPaymentResponse = outcome.paymentResponse;
+    if (!outcome.isSuccess) {
+      _error = outcome.message;
     }
+
+    _isLoading = false;
+    notifyListeners();
+    return outcome;
   }
 }
 
@@ -468,16 +358,9 @@ class NotificationService extends ChangeNotifier {
     notifyListeners();
 
     try {
-      if (ApiConfig.useMock) {
-        await Future.delayed(const Duration(milliseconds: 400));
-        _notifications = AppMockData.notifications;
-      } else {
-        final response = await _api.get('/notifications');
-        _notifications = (response.data['notifications'] as List<dynamic>?)
-                ?.map((e) => NotificationModel.fromJson(e as Map<String, dynamic>))
-                .toList() ??
-            [];
-      }
+      // Force mock
+      await Future.delayed(const Duration(milliseconds: 400));
+      _notifications = AppMockData.notifications;
     } catch (_) {}
 
     _isLoading = false;
@@ -485,17 +368,8 @@ class NotificationService extends ChangeNotifier {
   }
 
   Future<void> fetchFaqs() async {
-    if (ApiConfig.useMock) {
-      _faqs = AppMockData.faqs;
-    } else {
-      try {
-        final response = await _api.get('/help/faqs');
-        _faqs = (response.data['faqs'] as List<dynamic>?)
-                ?.map((e) => FaqModel.fromJson(e as Map<String, dynamic>))
-                .toList() ??
-            [];
-      } catch (_) {}
-    }
+    // Force mock
+    _faqs = AppMockData.faqs;
     notifyListeners();
   }
 

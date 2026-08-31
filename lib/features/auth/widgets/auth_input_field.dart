@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../core/constants/app_colors.dart';
+import 'package:flutter/services.dart';
 
 class AuthInputField extends StatelessWidget {
   final String hint;
@@ -176,11 +177,90 @@ class AuthDivider extends StatelessWidget {
   }
 }
 
-class OtpInputRow extends StatelessWidget {
+class OtpInputRow extends StatefulWidget {
   final List<String> digits;
   final void Function(int index, String value) onChanged;
 
-  const OtpInputRow({super.key, required this.digits, required this.onChanged});
+  const OtpInputRow({
+    super.key,
+    required this.digits,
+    required this.onChanged,
+  });
+
+  @override
+  State<OtpInputRow> createState() => _OtpInputRowState();
+}
+
+class _OtpInputRowState extends State<OtpInputRow> {
+  late final List<TextEditingController> _controllers;
+  late final List<FocusNode> _focusNodes;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _controllers = List.generate(
+      6,
+          (index) => TextEditingController(
+        text: widget.digits[index],
+      ),
+    );
+
+    _focusNodes = List.generate(6, (_) => FocusNode());
+  }
+
+  @override
+  void didUpdateWidget(covariant OtpInputRow oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    for (int i = 0; i < 6; i++) {
+      if (_controllers[i].text != widget.digits[i]) {
+        _controllers[i].text = widget.digits[i];
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    for (final controller in _controllers) {
+      controller.dispose();
+    }
+
+    for (final node in _focusNodes) {
+      node.dispose();
+    }
+
+    super.dispose();
+  }
+
+  void _handleChanged(int index, String value) {
+    // Handle paste
+    if (value.length > 1) {
+      final chars = value.split('');
+
+      for (int i = 0; i < chars.length && i < 6; i++) {
+        _controllers[i].text = chars[i];
+        widget.onChanged(i, chars[i]);
+      }
+
+      FocusScope.of(context).unfocus();
+      return;
+    }
+
+    widget.onChanged(index, value);
+
+    if (value.isNotEmpty) {
+      if (index < 5) {
+        _focusNodes[index + 1].requestFocus();
+      } else {
+        FocusScope.of(context).unfocus();
+      }
+    } else {
+      if (index > 0) {
+        _focusNodes[index - 1].requestFocus();
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -191,17 +271,21 @@ class OtpInputRow extends StatelessWidget {
       children: List.generate(6, (index) {
         return SizedBox(
           width: 48.w,
-          height: 56.h,
-          child: TextFormField(
-            key: ValueKey('otp_${index}_${digits[index]}'),
-            initialValue: digits[index].isEmpty ? null : digits[index],
+          height: 60.h,
+          child: TextField(
+            controller: _controllers[index],
+            focusNode: _focusNodes[index],
             textAlign: TextAlign.center,
+            textAlignVertical: TextAlignVertical.center,
             keyboardType: TextInputType.number,
             maxLength: 1,
+            inputFormatters: [
+              FilteringTextInputFormatter.digitsOnly,
+            ],
             style: textTheme.headlineSmall?.copyWith(
               color: AppColors.authNavy,
               fontWeight: FontWeight.w700,
-              fontSize: 22.sp,
+              fontSize: 16.sp,
             ),
             decoration: InputDecoration(
               counterText: '',
@@ -213,10 +297,13 @@ class OtpInputRow extends StatelessWidget {
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10.r),
-                borderSide: const BorderSide(color: AppColors.authPurple, width: 2),
+                borderSide: const BorderSide(
+                  color: AppColors.authPurple,
+                  width: 2,
+                ),
               ),
             ),
-            onChanged: (v) => onChanged(index, v),
+            onChanged: (value) => _handleChanged(index, value),
           ),
         );
       }),

@@ -6,10 +6,10 @@ enum Environment { development, staging, production }
 
 class ApiConfig {
   static DataSourceType get dataSourceType {
-    const value = String.fromEnvironment('DATA_SOURCE');
-    if (value == 'api') return DataSourceType.api;
+    const value = String.fromEnvironment('DATA_SOURCE', defaultValue: 'api');
+    if (value == 'mock') return DataSourceType.mock;
     if (value == 'firebase') return DataSourceType.firebase;
-    return DataSourceType.mock;
+    return DataSourceType.api;
   }
 
   static bool get useFirebase => dataSourceType == DataSourceType.firebase;
@@ -17,14 +17,21 @@ class ApiConfig {
   static bool get useMock => dataSourceType == DataSourceType.mock;
 
   /// When true, email/password auth uses Firebase instead of mock/API.
-  static bool get useFirebaseAuth => !useMock;
+  static bool get useFirebaseAuth => !useMock && !useApi; // Disable firebase auth when using custom API
 
   static String get baseUrl {
+    String url;
     const dartDefine = String.fromEnvironment('BASE_URL');
-    if (dartDefine.isNotEmpty) return dartDefine;
-    final envVal = dotenv.env['BASE_URL'];
-    if (envVal != null && envVal.isNotEmpty) return envVal;
-    return 'https://api.tapontask.com';
+    if (dartDefine.isNotEmpty) {
+      url = dartDefine;
+    } else {
+      url = dotenv.env['BASE_URL'] ?? 'https://tot.nkm.mjm.mybluehost.me';
+    }
+    
+    if (url.endsWith('/')) {
+      url = url.substring(0, url.length - 1);
+    }
+    return '$url/api/v1/';
   }
 
   static Environment get currentEnvironment {
@@ -39,6 +46,20 @@ class ApiConfig {
 
   static const Duration connectTimeout = Duration(seconds: 40);
   static const Duration receiveTimeout = Duration(seconds: 40);
+
+  static String get stripePublishableKey {
+    const dartDefine = String.fromEnvironment('STRIPE_PUBLISHABLE_KEY');
+    if (dartDefine.isNotEmpty) return dartDefine;
+    return dotenv.env['STRIPE_PUBLISHABLE_KEY'] ?? '';
+  }
+
+  /// Temporary client-side secret for PaymentIntent creation until backend
+  /// exposes a create-intent endpoint. Do not ship production builds with this.
+  static String get stripeSecretKey {
+    const dartDefine = String.fromEnvironment('STRIPE_SECRET_KEY');
+    if (dartDefine.isNotEmpty) return dartDefine;
+    return dotenv.env['STRIPE_SECRET_KEY'] ?? '';
+  }
 
   static const String storageKeyAccessToken = 'access_token';
   static const String storageKeyRefreshToken = 'refresh_token';

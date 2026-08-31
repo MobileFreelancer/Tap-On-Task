@@ -40,22 +40,14 @@ class AuthScaffold extends StatelessWidget {
                   bottom: false,
                   child: showLogo
                       ? Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const AuthLogo(size: 56),
-                            SizedBox(height: 10.h),
-                            Text(
-                              'Tap on Task',
-                              style: textTheme.titleLarge?.copyWith(
-                                color: AppColors.textWhite,
-                                fontWeight: FontWeight.w700,
-                                fontSize: 20.sp,
-                              ),
-                            ),
-                          ],
-                        )
+                    mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const AuthLogo(size: 100),
+                          SizedBox(height: 20.h),
+                        ],
+                      )
                       : Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 16.w),
+                          padding: EdgeInsets.symmetric(horizontal: 16.w).copyWith(bottom: 30.h),
                           child: Row(
                             children: [
                               if (showBack)
